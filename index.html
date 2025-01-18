@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA SAMP SEKTOR: Недельная лотерея</title>
+    <style>
+        /* Основные стили */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000; /* Чёрный фон для контраста с видео */
+            overflow: hidden;
+        }
+
+        /* Видео на заднем плане */
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Видео позади контента */
+        }
+
+        /* Контейнер с полупрозрачным фоном */
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный чёрный фон */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 600px;
+            backdrop-filter: blur(10px); /* Размытие фона */
+        }
+
+        /* Надпись "До генерации осталось" */
+        #status {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #fff; /* Белый текст */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Свечение текста */
+        }
+
+        /* Таймер */
+        #timer {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ffcc00; /* Жёлтый цвет */
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; /* Свечение */
+            animation: glow 1.5s infinite alternate; /* Анимация свечения */
+        }
+
+        /* Анимация свечения для таймера */
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
+            }
+            to {
+                text-shadow: 0 0 20px #ffcc00, 0 0 30px #ffcc00, 0 0 40px #ffcc00;
+            }
+        }
+
+        /* История розыгрышей */
+        #history {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        #history h2 {
+            font-size: 1.5em;
+            color: #fff; /* Белый текст */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Свечение текста */
+        }
+
+        #history-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #history-list li {
+            margin: 10px 0;
+            font-size: 1.2em;
+            color: #ccc; /* Светло-серый текст */
+        }
+    </style>
+</head>
+<body>
+    <!-- Видео на заднем плане -->
+    <video autoplay muted loop>
+        <source src="evo.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+
+    <!-- Основной контент -->
+    <div class="container">
+		<h1 id="status">Вторник и суббота в 00:01</h1>
+        <h1 id="status">До генерации осталось:</h1>
+        <div id="timer"></div>
+        <div id="history">
+            <h2>История генераций:</h2>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        let nextDate = calculateNextDate(); // Глобальная переменная для хранения следующей даты генерации
+
+        // Функция для вычисления следующей даты генерации (вторник или суббота в 00:01)
+        function calculateNextDate() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (воскресенье) до 6 (суббота)
+            const targetDays = [2, 6]; // Вторник (2) и суббота (6)
+
+            // Находим ближайший целевой день
+            let daysToAdd = 0;
+            for (let i = 0; i < targetDays.length; i++) {
+                if (targetDays[i] > dayOfWeek || (targetDays[i] === dayOfWeek && now.getHours() < 0) || (targetDays[i] === dayOfWeek && now.getHours() === 0 && now.getMinutes() < 1)) {
+                    daysToAdd = targetDays[i] - dayOfWeek;
+                    break;
+                }
+            }
+
+            // Если сегодня уже прошло время 00:01, переходим к следующему целевому дню
+            if (daysToAdd === 0) {
+                daysToAdd = targetDays[0] - dayOfWeek + 7; /* Переход к следующему вторнику */
+            }
+
+            const nextDate = new Date(now);
+            nextDate.setDate(now.getDate() + daysToAdd);
+            nextDate.setHours(0, 1, 0, 0); /* Устанавливаем время 00:01 */
+            return nextDate;
+        }
+
+        // Функция для обновления таймера
+        function updateTimer() {
+            const now = new Date();
+            const timeDiff = nextDate - now;
+
+            // Если время генерации наступило
+            if (timeDiff <= 0) {
+                generateNumber(); /* Генерируем число */
+                nextDate = calculateNextDate(); /* Обновляем следующую дату генерации */
+            }
+
+            // Обновляем таймер
+            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').innerText = `${days} д. ${hours} ч. ${minutes} мин. ${seconds} сек.`;
+        }
+
+        // Функция для загрузки истории из localStorage
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('lotteryHistory')) || [];
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = ''; // Очищаем список перед загрузкой
+
+            history.forEach((item) => {
+                const listItem = document.createElement('li');
+                listItem.innerText = `${item.date}: ${item.number}`;
+                historyList.appendChild(listItem);
+            });
+        }
+
+        // Функция для сохранения истории в localStorage
+        function saveHistory(date, number) {
+            const history = JSON.parse(localStorage.getItem('lotteryHistory')) || [];
+            history.push({ date, number }); // Добавляем новую запись
+            localStorage.setItem('lotteryHistory', JSON.stringify(history)); // Сохраняем обновлённый массив
+        }
+
+        // Функция для генерации случайного числа
+        function generateNumber() {
+            const randomNumber = Math.floor(Math.random() * 100) + 1; /* Генерация числа от 1 до 100 */
+            const currentDate = new Date().toLocaleDateString(); /* Получаем текущую дату */
+
+            // Сохраняем результат в историю
+            saveHistory(currentDate, randomNumber);
+
+            // Обновляем отображение
+            document.getElementById('number').innerText = randomNumber;
+            document.getElementById('status').innerText = 'Число этой недели:';
+            document.getElementById('result').style.display = 'block';
+
+            // Загружаем обновлённую историю
+            loadHistory();
+        }
+
+        // Запуск таймера
+        setInterval(updateTimer, 1000);
+        updateTimer(); /* Инициализация при загрузке страницы */
+
+        // Загружаем историю при загрузке страницы
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
