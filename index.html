@@ -10,10 +10,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #000;
-            overflow: hidden;
+            overflow-y: auto;
         }
 
         video {
@@ -189,6 +189,65 @@
                 opacity: 0;
             }
         }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 20px;
+                align-items: stretch;
+            }
+
+            video {
+                display: none;
+            }
+
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px;
+                border-radius: 0;
+                box-shadow: none;
+                backdrop-filter: none;
+                background-color: rgba(0, 0, 0, 0.9);
+                order: 1;
+            }
+
+            #status {
+                display: none;
+            }
+
+            #timer {
+                font-size: 2em;
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+
+            #history {
+                display: none;
+            }
+
+            .numbers-grid {
+                position: static;
+                transform: none;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+                gap: 5px;
+                width: 100%;
+                padding: 10px;
+                box-sizing: border-box;
+                margin-left: 0;
+                order: 2;
+                margin-bottom: 20px;
+            }
+
+            .number-square {
+                width: 100%;
+                height: 40px;
+                font-size: 1.2em;
+                border-radius: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -216,6 +275,22 @@
     <script>
         const SERVER_URL = 'https://languid-abyssinian-maxilla.glitch.me';
         let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        if (isMobile()) {
+            const video = document.querySelector('video');
+            if (video) {
+                video.style.display = 'none';
+            }
+
+            const historySection = document.getElementById('history');
+            if (historySection) {
+                historySection.style.display = 'none';
+            }
+        }
 
         const numbersGrid = document.getElementById('numbers-grid');
         for (let i = 1; i <= 100; i++) {
@@ -294,38 +369,45 @@
 
         document.querySelectorAll('.number-square').forEach(square => {
             square.addEventListener('click', async () => {
-                if (!isAuthenticated) {
-                    const password = prompt('Введите пароль:');
-                    if (password) {
-                        const success = await authenticate(password);
-                        if (success) {
-                            showAlert('Успешная авторизация!', true);
-                        } else {
-                            showAlert('Ошибка авторизации!', false);
-                        }
-                    }
-                    return;
-                }
-
-                const number = square.getAttribute('data-number');
-                if (square.classList.contains('reserved')) {
-                    const confirmFree = confirm('Освободить квадратик?');
-                    if (confirmFree) {
-                        const success = await reserveNumber(number, '');
-                        if (success) {
-                            square.classList.remove('reserved');
-                            square.removeAttribute('title');
-                            loadData();
-                        }
+                if (isMobile()) {
+                    const nickname = square.getAttribute('title');
+                    if (nickname) {
+                        alert(nickname);
                     }
                 } else {
-                    const nickname = prompt('Введите ник игрока:');
-                    if (nickname) {
-                        const success = await reserveNumber(number, nickname);
-                        if (success) {
-                            square.classList.add('reserved');
-                            square.setAttribute('title', `Игрок: ${nickname}`);
-                            loadData();
+                    if (!isAuthenticated) {
+                        const password = prompt('Введите пароль:');
+                        if (password) {
+                            const success = await authenticate(password);
+                            if (success) {
+                                showAlert('Успешная авторизация!', true);
+                            } else {
+                                showAlert('Ошибка авторизации!', false);
+                            }
+                        }
+                        return;
+                    }
+
+                    const number = square.getAttribute('data-number');
+                    if (square.classList.contains('reserved')) {
+                        const confirmFree = confirm('Освободить квадратик?');
+                        if (confirmFree) {
+                            const success = await reserveNumber(number, '');
+                            if (success) {
+                                square.classList.remove('reserved');
+                                square.removeAttribute('title');
+                                loadData();
+                            }
+                        }
+                    } else {
+                        const nickname = prompt('Введите ник игрока:');
+                        if (nickname) {
+                            const success = await reserveNumber(number, nickname);
+                            if (success) {
+                                square.classList.add('reserved');
+                                square.setAttribute('title', `Игрок: ${nickname}`);
+                                loadData();
+                            }
                         }
                     }
                 }
