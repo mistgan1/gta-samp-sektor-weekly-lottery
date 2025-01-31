@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр логов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #fileList {
+            margin-bottom: 20px;
+        }
+        .fileItem {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .fileItem:hover {
+            background-color: #e0e0e0;
+        }
+        #fileContent {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Файлы</h1>
+    <div id="fileList">Загрузка списка файлов...</div>
+    <h2>Содержимое файла:</h2>
+    <pre id="fileContent">Выберите файл для просмотра</pre>
+
+    <script>
+        async function loadFileList() {
+            const fileList = document.getElementById('fileList');
+            const fileContent = document.getElementById('fileContent');
+
+            try {
+                const response = await fetch('https://gta-samp-sektor-weekly-lottery.glitch.me/logs');
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке списка файлов');
+                }
+                const files = await response.json();
+
+                fileList.innerHTML = '';
+
+                files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'fileItem';
+                    fileItem.textContent = file;
+                    fileItem.onclick = () => loadFileContent(file);
+                    fileList.appendChild(fileItem);
+                });
+            } catch (error) {
+                fileList.textContent = `Ошибка: ${error.message}`;
+                console.error('Ошибка:', error);
+            }
+        }
+
+        async function loadFileContent(filename) {
+            const fileContent = document.getElementById('fileContent');
+
+            try {
+                const response = await fetch(`https://gta-samp-sektor-weekly-lottery.glitch.me/log/${filename}`);
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке файла');
+                }
+                const data = await response.json();
+                fileContent.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                fileContent.textContent = `Ошибка: ${error.message}`;
+                console.error('Ошибка:', error);
+            }
+        }
+
+        window.onload = loadFileList;
+    </script>
+</body>
+</html>
