@@ -5,251 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GTA SAMP SEKTOR: Недельная лотерея</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #000;
-            overflow-y: auto;
-        }
-
-        video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-        }
-
-        .container {
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 600px;
-            backdrop-filter: blur(10px);
-            position: relative;
-            z-index: 1;
-        }
-
-        #status {
-            font-size: 2em;
-            margin-bottom: 10px;
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-
-        #timer {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #ffcc00;
-            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
-            animation: glow 1.5s infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00;
-            }
-            to {
-                text-shadow: 0 0 20px #ffcc00, 0 0 30px #ffcc00, 0 0 40px #ffcc00;
-            }
-        }
-
-        #history {
-            margin-top: 40px;
-            text-align: left;
-        }
-
-        #history h2 {
-            font-size: 1.5em;
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-
-        #history-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        #history-list li {
-            margin: 10px 0;
-            font-size: 1.2em;
-            color: #ccc;
-        }
-
-        .numbers-grid {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: grid;
-            grid-template-columns: repeat(10, 40px);
-            grid-template-rows: repeat(10, 40px);
-            gap: 5px;
-        }
-
-        .number-square {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 5px;
-            color: #fff;
-            font-size: 1.2em;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .number-square:hover {
-            outline: 2px solid white;
-        }
-
-        .number-square.reserved {
-            background-color: rgba(255, 0, 0, 0.7);
-        }
-
-        .edit-btn {
-            margin-left: 10px;
-            padding: 5px 10px;
-            background-color: #ffcc00;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .winner-name {
-            margin-left: 10px;
-            color: #ffcc00;
-        }
-
-        #logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px;
-            background-color: #ffcc00;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            color: #000;
-            box-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
-            transition: background-color 0.3s ease;
-        }
-
-        #logout-btn:hover {
-            background-color: #ff9900;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 1em;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.5s ease, fadeOut 0.5s ease 2.5s;
-        }
-
-        .alert.success {
-            background-color: #4CAF50;
-        }
-
-        .alert.error {
-            background-color: #F44336;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-            }
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-                justify-content: flex-start;
-                padding-top: 20px;
-                align-items: stretch;
-            }
-
-            video {
-                display: none;
-            }
-
-            .container {
-                width: 100%;
-                max-width: 100%;
-                padding: 10px;
-                border-radius: 0;
-                box-shadow: none;
-                backdrop-filter: none;
-                background-color: rgba(0, 0, 0, 0.9);
-                order: 1;
-            }
-
-            #status {
-                display: none;
-            }
-
-            #timer {
-                font-size: 2em;
-                margin-top: 10px;
-                margin-bottom: 20px;
-            }
-
-            #history {
-                display: none;
-            }
-
-            .numbers-grid {
-                position: static;
-                transform: none;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-                gap: 5px;
-                width: 100%;
-                padding: 10px;
-                box-sizing: border-box;
-                margin-left: 0;
-                order: 2;
-                margin-bottom: 20px;
-            }
-
-            .number-square {
-                width: 100%;
-                height: 40px;
-                font-size: 1.2em;
-                border-radius: 10px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
@@ -272,286 +28,66 @@
             <ul id="history-list"><h2><img src="duck.gif"/> Загрузка данных...</h2></ul>
         </div>
     </div>
-
-    <script>
-        const SERVER_URL = 'https://gta-samp-sektor-weekly-lottery.glitch.me';
-        let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        if (isMobile()) {
-            const video = document.querySelector('video');
-            if (video) {
-                video.style.display = 'none';
-            }
-
-            const historySection = document.getElementById('history');
-            if (historySection) {
-                historySection.style.display = 'none';
-            }
-        }
-
-        const numbersGrid = document.getElementById('numbers-grid');
-        for (let i = 1; i <= 100; i++) {
-            const square = document.createElement('div');
-            square.classList.add('number-square');
-            square.innerText = i;
-            square.setAttribute('data-number', i);
-            numbersGrid.appendChild(square);
-        }
-
-        async function loadData() {
-            try {
-                const response = await fetch(`${SERVER_URL}/names`);
-                const data = await response.json();
-                data.forEach(item => {
-                    const square = document.querySelector(`.number-square[data-number="${item.number}"]`);
-                    if (square) {
-                        square.classList.add('reserved');
-                        square.setAttribute('title', `Игрок: ${item.nickname}`);
-                    }
-                });
-            } catch (error) {
-                console.error('Ошибка при загрузке данных:', error);
-            }
-        }
-
-        async function loadHistory() {
-            try {
-                const response = await fetch(`${SERVER_URL}/history`);
-                const history = await response.json();
-                const historyList = document.getElementById('history-list');
-                historyList.innerHTML = '';
-
-                history.forEach((item) => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                        <span>${item.date}: ${item.number}</span>
-                        ${isAuthenticated ? '<button class="edit-btn">ред</button>' : ''}
-                        <span class="winner-name">${item.name ? item.name : ''}</span>
-                    `;
-                    historyList.appendChild(listItem);
-
-                    if (isAuthenticated) {
-                        const editBtn = listItem.querySelector('.edit-btn');
-                        editBtn.addEventListener('click', () => {
-                            const name = prompt('Введите никнейм победителя:');
-                            if (name !== null) {
-                                updateWinner(item.date, item.number, name);
-                            }
-                        });
-                    }
-                });
-            } catch (error) {
-                console.error('Ошибка при загрузке истории:', error);
-            }
-        }
-
-        async function updateWinner(date, number, name) {
-            try {
-                const response = await fetch(`${SERVER_URL}/update-winner`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date, number, name }),
-                });
-                const data = await response.json();
-                if (data.success) {
-                    loadHistory();
-                } else {
-                    showAlert('Ошибка при обновлении никнейма', false);
-                }
-            } catch (error) {
-                console.error('Ошибка при обновлении никнейма:', error);
-                showAlert('Произошла ошибка при обновлении никнейма.', false);
-            }
-        }
-
-        document.querySelectorAll('.number-square').forEach(square => {
-            square.addEventListener('click', async () => {
-                if (isMobile()) {
-                    const nickname = square.getAttribute('title');
-                    if (nickname) {
-                        alert(nickname);
-                    }
-                } else {
-                    if (!isAuthenticated) {
-                        const password = prompt('Введите пароль:');
-                        if (password) {
-                            const success = await authenticate(password);
-                            if (success) {
-                                showAlert('Успешная авторизация!', true);
-                            } else {
-                                showAlert('Ошибка авторизации!', false);
-                            }
-                        }
-                        return;
-                    }
-
-                    const number = square.getAttribute('data-number');
-                    if (square.classList.contains('reserved')) {
-                        const confirmFree = confirm('Освободить квадратик?');
-                        if (confirmFree) {
-                            const success = await reserveNumber(number, '');
-                            if (success) {
-                                square.classList.remove('reserved');
-                                square.removeAttribute('title');
-                                loadData();
-                            }
-                        }
-                    } else {
-                        const nickname = prompt('Введите ник игрока:');
-                        if (nickname) {
-                            const success = await reserveNumber(number, nickname);
-                            if (success) {
-                                square.classList.add('reserved');
-                                square.setAttribute('title', `Игрок: ${nickname}`);
-                                loadData();
-                            }
-                        }
-                    }
-                }
-            });
-        });
-
-        async function authenticate(password) {
-            try {
-                const response = await fetch(`${SERVER_URL}/auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Ошибка авторизации');
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    isAuthenticated = true;
-                    localStorage.setItem('isAuthenticated', 'true');
-                    window.location.reload();
-                } else {
-                    throw new Error('Ошибка авторизации');
-                }
-            } catch (error) {
-                console.error('Ошибка при авторизации:', error);
-                showAlert('Ошибка авторизации!', false);
-            }
-        }
-
-        async function reserveNumber(number, nickname) {
-            try {
-                const response = await fetch(`${SERVER_URL}/reserve`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ number, nickname }),
-                });
-                const data = await response.json();
-                return data.success;
-            } catch (error) {
-                console.error('Ошибка при сохранении:', error);
-                return false;
-            }
-        }
-
-        function logout() {
-            isAuthenticated = false;
-            localStorage.removeItem('isAuthenticated');
-            window.location.reload();
-        }
-
-        function updateLogoutButton() {
-            const logoutBtn = document.getElementById('logout-btn');
-            if (isAuthenticated) {
-                logoutBtn.style.display = 'block';
-            } else {
-                logoutBtn.style.display = 'none';
-            }
-        }
-
-        document.getElementById('logout-btn').addEventListener('click', logout);
-
-        function showAlert(message, isSuccess) {
-            const alertContainer = document.getElementById('alert-container');
-            const alert = document.createElement('div');
-            alert.classList.add('alert');
-            alert.classList.add(isSuccess ? 'success' : 'error');
-            alert.innerText = message;
-            alertContainer.appendChild(alert);
-
-            setTimeout(() => {
-                alert.remove();
-            }, 3000);
-        }
-
-        function calculateNextDate() {
-            const now = new Date();
-            const dayOfWeek = now.getDay();
-            const targetDays = [2, 6];
-
-            let daysToAdd = 0;
-            for (let i = 0; i < targetDays.length; i++) {
-                if (targetDays[i] > dayOfWeek || (targetDays[i] === dayOfWeek && (now.getHours() < 0 || (now.getHours() === 0 && now.getMinutes() < 1)))) {
-                    daysToAdd = targetDays[i] - dayOfWeek;
-                    break;
-                }
-            }
-
-            if (daysToAdd === 0) {
-                daysToAdd = targetDays[0] - dayOfWeek + 7;
-            }
-
-            const nextDate = new Date(now);
-            nextDate.setDate(now.getDate() + daysToAdd);
-            nextDate.setHours(0, 1, 0, 0);
-            return nextDate;
-        }
-
-        let nextDate = calculateNextDate();
-
-        function updateTimer() {
-            const now = new Date();
-            const timeDiff = nextDate - now;
-
-            if (timeDiff <= 0) {
-                generateNumber();
-                nextDate = calculateNextDate();
-            }
-
-            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-            document.getElementById('timer').innerText = `${days} д. ${hours} ч. ${minutes} мин. ${seconds} сек.`;
-        }
-
-        async function generateNumber() {
-            try {
-                const response = await fetch(`${SERVER_URL}/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-                const data = await response.json();
-                if (data.success) {
-                    loadHistory();
-                }
-            } catch (error) {
-                console.error('Ошибка при генерации числа:', error);
-            }
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-
-        window.onload = () => {
-            updateLogoutButton();
-            loadData();
-            loadHistory();
-        };
-    </script>
+	<div class="prize-list-container">
+		<h2 class="prize-title">Уже выиграли</h2>
+		<div class="prizes">
+			<div class="prize-item">
+				<span class="image-count" id="count-coupons">Купоны</span>
+				<img src="pic/coupons.gif" alt="coupons">
+				<span class="image-count" id="count-coupons-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-berry">Конфеты</span>
+				<img src="pic/berry.gif" alt="berry">
+				<span class="image-count" id="count-berry-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-dragon">Дракон</span>
+				<img src="pic/dragon.gif" alt="dragon">
+				<span class="image-count" id="count-dragon-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-krasnorech">Красноречие</span>
+				<img src="pic/krasnorech.gif" alt="krasnorech">
+				<span class="image-count" id="count-krasnorech-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-nemota">Немота</span>
+				<img src="pic/nemota.gif" alt="nemota">
+				<span class="image-count" id="count-nemota-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-otluch">Отлучение</span>
+				<img src="pic/otluch.gif" alt="otluch">
+				<span class="image-count" id="count-otluch-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-heavy">Тяжесть</span>
+				<img src="pic/heavy.gif" alt="heavy">
+				<span class="image-count" id="count-heavy-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-gorgon">Горгона</span>
+				<img src="pic/gorgon.gif" alt="gorgon">
+				<span class="image-count" id="count-gorgon-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-vedma">Ведьмино</span>
+				<img src="pic/vedma.gif" alt="vedma">
+				<span class="image-count" id="count-vedma-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-goldapple">З.Яблоко</span>
+				<img src="pic/goldenapple.gif" alt="goldapple">
+				<span class="image-count" id="count-goldapple-value">Загрузка...</span>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-5kk">5kk вирт</span>
+				<img src="pic/5kk.gif" alt="5kk">
+				<span class="image-count" id="count-5kk-value">Загрузка...</span>
+			</div>
+		</div>
+	</div>
+    <script src="script.js"></script>
 </body>
 </html>
