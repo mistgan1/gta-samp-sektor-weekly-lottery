@@ -44,8 +44,13 @@ async function loadData() {
 
 async function loadHistory() {
     try {
-        const response = await fetch(`${SERVER_URL}/history`);
+        const timestamp = new Date().getTime(); // 🚀 Добавляем временную метку
+        const response = await fetch(`${SERVER_URL}/history?t=${timestamp}`);
+        if (!response.ok) throw new Error('Ошибка загрузки истории');
+
         const history = await response.json();
+        console.log("📂 Загруженная история:", history);
+
         const historyList = document.getElementById('history-list');
         historyList.innerHTML = '';
 
@@ -58,20 +63,24 @@ async function loadHistory() {
             `;
             historyList.appendChild(listItem);
 
-            if (isAuthenticated) {
-                const editBtn = listItem.querySelector('.edit-btn');
-                editBtn.addEventListener('click', () => {
-                    const name = prompt('Введите никнейм победителя:');
-                    if (name !== null) {
-                        updateWinner(item.date, item.number, name);
-                    }
-                });
+            // Загружаем картинку приза, если приз есть
+            if (item.prize && item.prize.trim() !== "") {
+                console.log(`🎁 Загружаем приз ${item.prize} для ${item.name}`);
+                const prizeImg = document.createElement('img');
+                prizeImg.src = `pic/${item.prize}.png?t=${timestamp}`; // 🚀 Добавляем timestamp
+                prizeImg.alt = item.prize;
+                prizeImg.classList.add('winner-prize-icon');
+                listItem.querySelector('.winner-name').appendChild(prizeImg);
             }
         });
+
+        addPrizeButtons();
     } catch (error) {
-        console.error('Ошибка при загрузке истории:', error);
+        console.error('❌ Ошибка при загрузке истории:', error);
     }
 }
+
+
 
 async function updateWinner(date, number, name) {
     try {
@@ -296,6 +305,228 @@ async function generateNumber() {
         console.error('Ошибка при генерации числа:', error);
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const addButton = document.getElementById('add-history-btn');
+
+    console.log("Проверяем авторизацию...", isAuthenticated); // Отладка
+
+    if (isAuthenticated) {
+        console.log("✅ Пользователь авторизован, показываем кнопку.");
+        addButton.style.display = 'block';
+    } else {
+        console.log("❌ Пользователь НЕ авторизован, кнопка скрыта.");
+    }
+
+    addButton.addEventListener('click', async function () {
+        const dateInput = prompt('Введите дату (в формате ДД.ММ.ГГГГ):');
+        if (!dateInput || !/^\d{2}\.\d{2}\.\d{4}$/.test(dateInput)) {
+            alert('Некорректный формат даты!');
+            return;
+        }
+
+        const number = prompt('Введите число:');
+        if (!number || isNaN(number)) {
+            alert('Введите корректное число!');
+            return;
+        }
+
+        const name = prompt('Введите имя (опционально):') || "Неизвестный";
+
+        try {
+            const response = await fetch(`${SERVER_URL}/add-history`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: dateInput, number, name }),
+            });
+
+            console.log("Ответ сервера:", response);
+
+            const data = await response.json();
+            console.log("JSON-ответ:", data);
+
+            if (data.success) {
+                showAlert('Запись успешно добавлена!', true);
+                loadHistory();
+            } else {
+                showAlert('Ошибка при добавлении!', false);
+            }
+        } catch (error) {
+            console.error('Ошибка при добавлении:', error);
+            showAlert('Ошибка сети!', false);
+        }
+    });
+});
+
+
+
+function scrollToBottom() {
+	setTimeout(() => {
+		var historyDiv = document.getElementById("history");
+		if (historyDiv) {
+			historyDiv.scrollTop = historyDiv.scrollHeight;
+		}
+	}, 100);
+}
+
+var observer = new MutationObserver(scrollToBottom);
+observer.observe(document.getElementById("history-list"), { childList: true, subtree: true });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Показываем кнопки "Редактировать" только для авторизованных пользователей
+    if (isAuthenticated) {
+        document.querySelectorAll('.edit-prize-btn').forEach(button => {
+            button.style.display = 'inline-block';
+            button.addEventListener('click', async function () {
+                const prizeType = this.getAttribute('data-prize');
+                const newValue = prompt(`Введите новое количество для ${prizeType}:`);
+                
+                if (!newValue || isNaN(newValue) || newValue < 0) {
+                    alert('Введите корректное число!');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${SERVER_URL}/update-prize`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prize: prizeType, count: Number(newValue) }),
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        showAlert(`Количество ${prizeType} обновлено!`, true);
+                        document.getElementById(`count-${prizeType}-value`).textContent = newValue; // Обновляем без перезагрузки
+                    } else {
+                        showAlert('Ошибка при обновлении!', false);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при обновлении:', error);
+                    showAlert('Ошибка сети!', false);
+                }
+            });
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+            isAuthenticated = false;
+            localStorage.removeItem('isAuthenticated');
+            showAlert('Вы вышли из аккаунта!', true);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        });
+    } else {
+        console.error("❌ Кнопка 'Выйти' не найдена в DOM!");
+    }
+});
+
+function addPrizeButtons() {
+    if (!isAuthenticated) return;
+
+    document.querySelectorAll('.winner-name').forEach(winner => {
+        if (winner.parentElement.querySelector('.add-prize-btn')) return;
+
+        const addPrizeBtn = document.createElement('button');
+        addPrizeBtn.textContent = '🎁';
+        addPrizeBtn.classList.add('add-prize-btn');
+        addPrizeBtn.style.marginLeft = '10px';
+
+        winner.parentElement.insertBefore(addPrizeBtn, winner.nextSibling);
+
+        addPrizeBtn.addEventListener('click', async function () {
+            const prizeList = [
+                { name: "coupons", src: "pic/coupons.png" },
+                { name: "berry", src: "pic/berry.png" },
+                { name: "dragon", src: "pic/dragon.png" },
+                { name: "krasnorech", src: "pic/krasnorech.png" },
+                { name: "nemota", src: "pic/nemota.png" },
+                { name: "otluch", src: "pic/otluch.png" },
+                { name: "heavy", src: "pic/heavy.png" },
+                { name: "gorgon", src: "pic/gorgon.png" },
+                { name: "vedma", src: "pic/vedma.png" },
+                { name: "goldapple", src: "pic/goldenapple.png" },
+                { name: "5kk", src: "pic/5kk.png" },
+				{ name: "valentin", src: "pic/valentin.png" }
+            ];
+
+            let prizeOptions = prizeList.map(prize => prize.name).join(', ');
+            const selectedPrize = prompt(`Выберите приз (оставьте пустым, чтобы удалить) coupons berry dragon krasnorech nemota otluch heavy gorgon vedma goldapple 5kk valentin:`).toLowerCase().trim();
+
+            // Если пустой ввод – очищаем приз
+            if (selectedPrize === "") {
+                updateWinnerPrize(winner, "");
+                return;
+            }
+
+            const prize = prizeList.find(p => p.name === selectedPrize);
+            if (!prize) {
+                alert('Некорректный выбор приза!');
+                return;
+            }
+
+            updateWinnerPrize(winner, prize.name, prize.src);
+        });
+    });
+}
+
+
+async function updateWinnerPrize(winner, prizeName, prizeSrc = "") {
+    const winnerName = winner.textContent.trim();
+    const winnerDate = winner.parentElement.querySelector('span:first-child').textContent.split(':')[0];
+
+    try {
+        const response = await fetch(`${SERVER_URL}/update-winner-prize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: winnerDate, name: winnerName, prize: prizeName }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            showAlert(prizeName ? `Приз ${prizeName} добавлен победителю ${winnerName}!` : `Приз удален у ${winnerName}`, true);
+
+            let prizeImg = winner.parentElement.querySelector('.winner-prize-icon');
+
+            if (prizeName) {
+                if (!prizeImg) {
+                    prizeImg = document.createElement('img');
+                    prizeImg.classList.add('winner-prize-icon');
+                    winner.appendChild(prizeImg);
+                }
+                prizeImg.src = prizeSrc;
+                prizeImg.alt = prizeName;
+            } else {
+                if (prizeImg) prizeImg.remove();
+            }
+
+            // 🚀 ПЕРЕЗАГРУЖАЕМ СПИСОК ПРИЗОВ ПОСЛЕ ОБНОВЛЕНИЯ HISTORY.JSON
+            loadHistory();
+        } else {
+            showAlert('Ошибка при обновлении приза!', false);
+        }
+    } catch (error) {
+        console.error('❌ Ошибка при обновлении:', error);
+        showAlert('Ошибка сети!', false);
+    }
+}
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    loadHistory().then(addPrizeButtons);
+
+    const observer = new MutationObserver(addPrizeButtons);
+    observer.observe(document.getElementById('history-list'), { childList: true, subtree: true });
+});
+
 
 setInterval(updateTimer, 1000);
 updateTimer();

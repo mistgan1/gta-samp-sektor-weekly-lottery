@@ -10,8 +10,6 @@
 <body>
     <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
 
-    <button id="logout-btn" style="display: none;">Выйти</button>
-
     <video autoplay muted loop>
         <source src="evo.mp4" type="video/mp4">
         Ваш браузер не поддерживает видео.
@@ -19,44 +17,52 @@
 
     <div class="numbers-grid" id="numbers-grid"></div>
 
-    <div class="container">
-        <h1 id="status">Вторник и суббота в 00:01</h1>
-        <h1 id="status">До генерации осталось:</h1>
-        <div id="timer"></div>
-        <div id="history">
-            <h2>История генераций:</h2>
-            <ul id="history-list"><h2><img src="duck.gif"/> Загрузка данных...</h2></ul>
-        </div>
-    </div>
-	<!-- <div class="prize-list-container">
+	<div class="container">
+		<h1 id="status">Вторник и суббота в 00:01</h1>
+		<h1 id="status">До генерации осталось:</h1>
+		<div id="timer"></div>
+		<div id="history">
+			<h2>История генераций:</h2>
+			<ul id="history-list"><h2><img src="duck.gif"/> Загрузка данных...</h2></ul>
+			<button id="add-history-btn" style="display: none;">Добавить</button>	
+		</div>
+	</div>
+	
+	<div class="logout-container">
+		<button id="logout-btn">Выйти</button>
+	</div>
+	
+	<div class="prize-list-container">
 		<h2 class="prize-title">Уже выиграли</h2>
 		<div class="prizes">
-			<div class="prize-item">
+			<!-- <div class="prize-item">
 				<span class="image-count" id="count-coupons">Купоны</span>
 				<img src="pic/coupons.png" alt="coupons">
 				<span class="image-count" id="count-coupons-value">Загрузка...</span>
-			</div>
+			</div> -->
 			<div class="prize-item">
 				<span class="image-count" id="count-berry">Конфеты</span>
 				<img src="pic/berry.png" alt="berry">
 				<span class="image-count" id="count-berry-value">Загрузка...</span>
+				<button class="edit-prize-btn" data-prize="berry" style="display: none;">✎</button>
 			</div>
-			<div class="prize-item">
+			<!--<div class="prize-item">
 				<span class="image-count" id="count-dragon">Дракон</span>
 				<img src="pic/dragon.png" alt="dragon">
 				<span class="image-count" id="count-dragon-value">Загрузка...</span>
-			</div>
+			</div>-->
 			<div class="prize-item">
 				<span class="image-count" id="count-krasnorech">Красноречие</span>
 				<img src="pic/krasnorech.png" alt="krasnorech">
 				<span class="image-count" id="count-krasnorech-value">Загрузка...</span>
+				<button class="edit-prize-btn" data-prize="krasnorech" style="display: none;">✎</button>
 			</div>
-			<div class="prize-item">
+			<!--<div class="prize-item">
 				<span class="image-count" id="count-nemota">Немота</span>
 				<img src="pic/nemota.png" alt="nemota">
 				<span class="image-count" id="count-nemota-value">Загрузка...</span>
-			</div>
-			<div class="prize-item">
+			</div>-->
+			<!--<div class="prize-item">
 				<span class="image-count" id="count-otluch">Отлучение</span>
 				<img src="pic/otluch.png" alt="otluch">
 				<span class="image-count" id="count-otluch-value">Загрузка...</span>
@@ -70,24 +76,32 @@
 				<span class="image-count" id="count-gorgon">Горгона</span>
 				<img src="pic/gorgon.png" alt="gorgon">
 				<span class="image-count" id="count-gorgon-value">Загрузка...</span>
-			</div>
+			</div>-->
 			<div class="prize-item">
 				<span class="image-count" id="count-vedma">Ведьмино</span>
 				<img src="pic/vedma.png" alt="vedma">
 				<span class="image-count" id="count-vedma-value">Загрузка...</span>
+				<button class="edit-prize-btn" data-prize="vedma" style="display: none;">✎</button>
 			</div>
-			<div class="prize-item">
+			<!--<div class="prize-item">
 				<span class="image-count" id="count-goldapple">З.Яблоко</span>
 				<img src="pic/goldenapple.png" alt="goldapple">
 				<span class="image-count" id="count-goldapple-value">Загрузка...</span>
-			</div>
+			</div>-->
 			<div class="prize-item">
 				<span class="image-count" id="count-5kk">5kk вирт</span>
 				<img src="pic/5kk.png" alt="5kk">
 				<span class="image-count" id="count-5kk-value">Загрузка...</span>
+				<button class="edit-prize-btn" data-prize="5kk" style="display: none;">✎</button>
+			</div>
+			<div class="prize-item">
+				<span class="image-count" id="count-5kk">Валентин</span>
+				<img src="pic/valentin.png" alt="5kk">
+				<span class="image-count" id="count-valentin-value">Загрузка...</span>
+				<button class="edit-prize-btn" data-prize="valentin" style="display: none;">✎</button>
 			</div>
 		</div>
-	</div> -->
+	</div>
     <script src="script.js"></script>
 </body>
 </html>
