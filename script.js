@@ -1,4 +1,4 @@
-const SERVER_URL = 'https://gta-samp-sektor-weekly-lottery.glitch.me';
+const SERVER_URL = 'https://gta-samp-sektor-weekly-lottery.onrender.com';
 let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
 function isMobile() {
