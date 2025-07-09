@@ -44,7 +44,7 @@
             const fileContent = document.getElementById('fileContent');
 
             try {
-                const response = await fetch('https://gta-samp-sektor-weekly-lottery.glitch.me/log');
+                const response = await fetch('https://gta-samp-sektor-weekly-lottery.onrender.com/log');
                 if (!response.ok) {
                     throw new Error('Ошибка при загрузке списка файлов');
                 }
@@ -69,7 +69,7 @@
             const fileContent = document.getElementById('fileContent');
 
             try {
-                const response = await fetch(`https://gta-samp-sektor-weekly-lottery.glitch.me/log/${filename}`);
+                const response = await fetch(`https://gta-samp-sektor-weekly-lottery.onrender.com/log/${filename}`);
                 if (!response.ok) {
                     throw new Error('Ошибка при загрузке файла');
                 }
