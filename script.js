@@ -455,10 +455,11 @@ function addPrizeButtons() {
 				{ name: "valentin", src: "pic/valentin.png" },
 				{ name: "rep", src: "pic/rep.png" },
 				{ name: "santa", src: "pic/santa.png" },
+                { name: "present", src: "pic/present.png" }
             ];
 
             let prizeOptions = prizeList.map(prize => prize.name).join(', ');
-            const selectedPrize = prompt(`Выберите приз (оставьте пустым, чтобы удалить) coupons berry dragon krasnorech nemota otluch heavy gorgon vedma goldapple 5kk valentin rep santa:`).toLowerCase().trim();
+            const selectedPrize = prompt(`Выберите приз (оставьте пустым, чтобы удалить) coupons berry dragon krasnorech nemota otluch heavy gorgon vedma goldapple 5kk valentin rep santa present:`).toLowerCase().trim();
 
             // Если пустой ввод – очищаем приз
             if (selectedPrize === "") {
