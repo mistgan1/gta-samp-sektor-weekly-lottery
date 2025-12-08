@@ -67,7 +67,7 @@ video {
     font-size: 1.2em;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
-
+/*
 .container {
     text-align: center;
     background-color: rgba(0, 0, 0, 0.7);
@@ -83,6 +83,73 @@ video {
     transform: translateX(-50%);
     z-index: 1;
 }
+*/
+.container {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.55);
+    padding: 40px;
+    border-radius: 15px;
+
+    /* ❄ Инеистая рамка */
+    border: 2px solid rgba(180, 220, 255, 0.6);
+
+    /* ❄ Лёгкое голубое свечение */
+    box-shadow:
+        0 0 25px rgba(140, 190, 255, 0.5),
+        inset 0 0 20px rgba(180, 220, 255, 0.3);
+
+    width: 90%;
+    max-width: 600px;
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+
+    /* ❄ Снежный налёт через градиенты */
+    background-image:
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0) 40%
+        ),
+        radial-gradient(
+            circle at top left,
+            rgba(255, 255, 255, 0.25),
+            rgba(255, 255, 255, 0) 60%
+        ),
+        radial-gradient(
+            circle at top right,
+            rgba(255, 255, 255, 0.18),
+            rgba(255, 255, 255, 0) 55%
+        );
+    background-blend-mode: lighten;
+}
+.container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0.20;
+
+    /* ❄ структура снега */
+    background-image:
+        radial-gradient(2px 2px at 20% 20%, rgba(255, 255, 255, 0.9), transparent),
+        radial-gradient(2px 2px at 80% 30%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(2px 2px at 50% 70%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(3px 3px at 30% 90%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1.5px 1.5px at 70% 60%, rgba(255, 255, 255, 0.6), transparent);
+
+    animation: snowfall 12s linear infinite;
+}
+
+@keyframes snowfall {
+    from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+    to   { background-position: 0 300px, 0 200px, 0 400px, 0 350px, 0 250px; }
+}
+
 
 #status {
     font-size: 2em;
@@ -90,7 +157,7 @@ video {
     color: #fff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
-
+/*
 #timer {
     font-size: 3em;
     font-weight: bold;
@@ -106,6 +173,24 @@ video {
     }
     to {
         text-shadow: 0 0 20px #ffcc00, 0 0 30px #ffcc00, 0 0 40px #ffcc00;
+    }
+}
+*/
+#timer {
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #7fd2ff; /* нежно-голубой */
+    text-shadow: 0 0 10px #7fd2ff, 0 0 20px #7fd2ff, 0 0 30px #7fd2ff;
+    animation: glow-blue 1.5s infinite alternate;
+}
+
+@keyframes glow-blue {
+    from {
+        text-shadow: 0 0 10px #7fd2ff, 0 0 20px #7fd2ff, 0 0 30px #7fd2ff;
+    }
+    to {
+        text-shadow: 0 0 20px #b5e9ff, 0 0 35px #b5e9ff, 0 0 45px #d7f5ff;
     }
 }
 
