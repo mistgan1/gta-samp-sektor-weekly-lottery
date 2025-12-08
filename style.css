@@ -214,13 +214,19 @@ video {
 	list-style-type: none;
 	padding: 0;
 }
-
+/*
 #history-list li {
 	margin: 5px 0;
 	font-size: 1.2em;
 	color: #ccc;
 	padding: 5px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+*/
+#history-list li {
+    color: #d6f3ff !important;
+    text-shadow: 0 0 5px #9fdcff;
+    border-bottom: 1px solid rgba(180, 220, 255, 0.25) !important;
 }
 
 .numbers-grid {
@@ -266,11 +272,16 @@ video {
     border-radius: 5px;
     cursor: pointer;
 }
-
+/*
 .winner-name {
     margin-left: 10px;
     color: #ffcc00;
+}*/
+.winner-name {
+    color: #9fdcff !important;
+    text-shadow: 0 0 8px #bfe9ff;
 }
+
 
 
 .logout-container {
