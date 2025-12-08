@@ -266,7 +266,7 @@ video {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
     color: #fff;
     font-size: 1.2em;
