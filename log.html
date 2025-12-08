@@ -63,28 +63,75 @@
 
     <script>
         async function loadFileList() {
-            const fileList = document.getElementById('fileList');
-            try {
-                const response = await fetch('https://gta-samp-sektor-weekly-lottery.onrender.com/log');
-                if (!response.ok) {
-                    throw new Error('Ошибка при загрузке списка файлов');
+        const fileList = document.getElementById('fileList');
+        try {
+            const response = await fetch('https://gta-samp-sektor-weekly-lottery.onrender.com/log');
+            if (!response.ok) throw new Error('Ошибка при загрузке списка файлов');
+            const files = await response.json();
+
+            const structured = {};
+            files.forEach(file => {
+                const match = file.match(/^(\d{2})-(\d{2})-(\d{4})\.json$/);
+                if (match) {
+                    const [_, day, month, year] = match;
+                    if (!structured[year]) structured[year] = {};
+                    if (!structured[year][month]) structured[year][month] = [];
+                    structured[year][month].push(file);
                 }
-                const files = await response.json();
+            });
 
-                fileList.innerHTML = '';
+            fileList.innerHTML = '';
 
-                files.forEach(file => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'fileItem';
-                    fileItem.textContent = file;
-                    fileItem.onclick = () => loadFileContent(file);
-                    fileList.appendChild(fileItem);
+            for (const year of Object.keys(structured).sort()) {
+                const yearDiv = document.createElement('div');
+                yearDiv.innerHTML = `<strong style="cursor:pointer;">${year}</strong>`;
+                yearDiv.style.marginTop = '10px';
+
+                const monthsContainer = document.createElement('div');
+                monthsContainer.style.display = 'none';
+                monthsContainer.style.marginLeft = '20px';
+
+                yearDiv.querySelector('strong').addEventListener('click', () => {
+                    monthsContainer.style.display = monthsContainer.style.display === 'none' ? 'block' : 'none';
                 });
-            } catch (error) {
-                fileList.textContent = `Ошибка: ${error.message}`;
-                console.error('Ошибка:', error);
+
+                for (const month of Object.keys(structured[year]).sort()) {
+                    const monthDiv = document.createElement('div');
+                    monthDiv.innerHTML = `<em style="cursor:pointer;">${month}</em>`;
+                    monthDiv.style.marginLeft = '10px';
+
+                    const filesContainer = document.createElement('div');
+                    filesContainer.style.display = 'none';
+                    filesContainer.style.marginLeft = '20px';
+
+                    monthDiv.querySelector('em').addEventListener('click', () => {
+                        filesContainer.style.display = filesContainer.style.display === 'none' ? 'block' : 'none';
+                    });
+
+                    structured[year][month].forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'fileItem';
+                        fileItem.textContent = file;
+                        fileItem.style.marginLeft = '10px';
+                        fileItem.onclick = () => loadFileContent(file);
+                        filesContainer.appendChild(fileItem);
+                    });
+
+                    monthDiv.appendChild(filesContainer);
+                    monthsContainer.appendChild(monthDiv);
+                }
+
+                yearDiv.appendChild(monthsContainer);
+                fileList.appendChild(yearDiv);
             }
+
+        } catch (error) {
+            fileList.textContent = `Ошибка: ${error.message}`;
+            console.error('Ошибка:', error);
         }
+    }
+
+
 
         async function loadFileContent(filename) {
             const fileContent = document.getElementById('fileContent');
