@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadHistory() {
     try {
-      const response = await fetch(`${SERVER_URL}/history`);
+      const response = await fetch(`${SERVER_URL}/history?ts=${Date.now()}`)
       const history = await response.json();
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '';
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function updatePrizes() {
     try {
-      const response = await fetch(`${SERVER_URL}/prizes`);
+      const response = await fetch(`${SERVER_URL}/prizes?ts=${Date.now()}`)
       if (!response.ok) throw new Error('Ошибка загрузки призов');
 
       const prizes = await response.json();
