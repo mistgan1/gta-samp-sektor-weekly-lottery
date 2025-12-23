@@ -501,6 +501,16 @@ async function deleteHistory(item) {
   loadHistory();
   updatePrizes();
 });
+const confirmBtn = document.getElementById('confirm-save-log-btn');
+const cancelBtn = document.getElementById('cancel-save-log-btn');
+
+if (confirmBtn) {
+    confirmBtn.addEventListener('click', confirmSaveLog);
+}
+
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeSaveLogModal);
+}
 
 // ------------------- Save to log -------------------
 
@@ -530,60 +540,55 @@ function closeSaveLogModal() {
 }
 
 async function confirmSaveLog() {
-  const filenameInput = document.getElementById('log-filename').value.trim();
-  
-  if (!filenameInput) {
-    showAlert('Введите имя файла', false);
-    return;
-  }
-
-  // Проверяем/нормализуем формат ДД_ММ_ГГГГ
-  let finalFilename = filenameInput;
-  if (!finalFilename.endsWith('.json')) {
-    finalFilename += '.json';
-  }
-
-  // Минимальная проверка формата
-  if (!/^\d{2}_\d{2}_\d{4}\.json$/.test(finalFilename)) {
-    showAlert('Формат должен быть ДД_ММ_ГГГГ.json', false);
-    return;
-  }
-
-  if (!confirm(`Сохранить файл как\n${finalFilename}?`)) {
-    return;
-  }
-
-  try {
-    // 1. Получаем текущие данные names.json
-    const namesRes = await fetch(`${SERVER_URL}/names`);
-    if (!namesRes.ok) throw new Error('Не удалось загрузить names.json');
-    const namesData = await namesRes.json();
-
-    // 2. Формируем путь в репозитории
-    const logPath = `log/${finalFilename}`;
-
-    // 3. Отправляем на сервер команду сохранить
-    const saveRes = await fetch(`${SERVER_URL}/save-to-log`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: logPath,
-        content: namesData
-      })
-    });
-
-    if (!saveRes.ok) {
-      const err = await saveRes.json();
-      throw new Error(err.message || 'Ошибка сохранения');
+    const filenameInput = document.getElementById('log-filename').value.trim();
+    
+    if (!filenameInput) {
+        showAlert('Введите имя файла', false);
+        return;
     }
 
-    closeSaveLogModal();
-    showAlert(`Файл ${finalFilename} успешно сохранён в log/`, true);
-    
-  } catch (e) {
-    console.error(e);
-    showAlert('Не удалось сохранить файл: ' + e.message, false);
-  }
+    let finalFilename = filenameInput;
+    if (!finalFilename.endsWith('.json')) {
+        finalFilename += '.json';
+    }
+
+    if (!/^\d{2}_\d{2}_\d{4}\.json$/.test(finalFilename)) {
+        showAlert('Формат должен быть ДД_ММ_ГГГГ.json', false);
+        return;
+    }
+
+    if (!confirm(`Сохранить файл как\n${finalFilename}?`)) {
+        return;
+    }
+
+    try {
+        const namesRes = await fetch(`${SERVER_URL}/names`);
+        if (!namesRes.ok) throw new Error('Не удалось загрузить names.json');
+        const namesData = await namesRes.json();
+
+        const logPath = `log/${finalFilename}`;
+
+        const saveRes = await fetch(`${SERVER_URL}/save-to-log`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                path: logPath,
+                content: namesData
+            })
+        });
+
+        if (!saveRes.ok) {
+            const err = await saveRes.json();
+            throw new Error(err.message || 'Ошибка сохранения');
+        }
+
+        closeSaveLogModal();
+        showAlert(`Файл ${finalFilename} успешно сохранён в log/`, true);
+        
+    } catch (e) {
+        console.error(e);
+        showAlert('Не удалось сохранить: ' + (e.message || 'неизвестная ошибка'), false);
+    }
 }
 
 // Экспортируем для onclick
