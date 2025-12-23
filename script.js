@@ -1,3 +1,6 @@
+console.log('SCRIPT LOADED');
+console.log('BEFORE FUNCTIONS');
+
 const SERVER_URL = 'https://gta-samp-sektor-weekly-lottery.onrender.com';
 let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
@@ -494,7 +497,10 @@ if (historyListEl) {
 setInterval(updateTimer, 1000);
 updateTimer();
 
+console.log('BEFORE ONLOAD');
+
 window.onload = () => {
+  console.log('ONLOAD FIRED');
   updateLogoutButton();
   updateAdminUI();
   updatePrizeEditButtons();
