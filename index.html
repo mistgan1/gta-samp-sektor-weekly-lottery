@@ -21,12 +21,23 @@
 		<h1 id="status">Вторник и суббота в 00:01</h1>
 		<h1 id="status">До генерации осталось:</h1>
 		<div id="timer"></div>
+
+
+    <div class="admin-buttons" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+        <button id="add-history-btn" style="display: none; padding: 10px 20px; background: #ffcc00; color: black; border: none; border-radius: 8px; cursor: pointer;">
+            Добавить запись
+        </button>
+        <button id="save-to-log-btn" style="display: none; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            Сохранить данные в JSON
+        </button>
+        <button id="clear-all-squares-btn" style="display: none; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            Очистить все квадраты
+        </button>
+    </div>
+
 		<div id="history">
 			<h2>История генераций:</h2>
 			<ul id="history-list"><h2><img src="winter_duck.gif"/> Загрузка данных...</h2>
-			<button id="add-history-btn" style="display: none;">Добавить</button>
-			<button id="save-to-log-btn" style="display: none; margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">Сохранить данные</button>
-			<button id="clear-all-squares-btn" style="display: none; margin-top: 15px; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer;">Очистить все квадраты</button>	
 		</div>
 	</div>
 	
