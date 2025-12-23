@@ -36,9 +36,47 @@ function openAddModal() {
     return;
   }
 
-document.getElementById('add-history-btn')?.addEventListener('click', () => {
-  openAddModal();
-});
+
+function bindPrizeEditButtons() {
+  document.querySelectorAll('.edit-prize-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!isAuthenticated) {
+        showAlert('Нет доступа', false);
+        return;
+      }
+
+      const prizeKey = btn.dataset.prize;
+      const currentValue = document.getElementById(`count-${prizeKey}-value`)?.innerText || '';
+
+      const newValue = prompt(`Введите новое количество для "${prizeKey}":`, currentValue);
+      if (newValue === null) return;
+
+      if (isNaN(newValue) || Number(newValue) < 0) {
+        showAlert('Некорректное число', false);
+        return;
+      }
+
+      updatePrizeCount(prizeKey, Number(newValue));
+    });
+  });
+}
+
+async function updatePrizeCount(prize, count) {
+  try {
+    const res = await fetch(`${SERVER_URL}/update-prize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prize, count })
+    });
+
+    if (!res.ok) throw new Error();
+
+    updatePrizes();
+    showAlert('Приз обновлён', true);
+  } catch {
+    showAlert('Ошибка обновления приза', false);
+  }
+}
 
 
   editMode = false;
@@ -314,18 +352,15 @@ async function authenticate(password) {
         if (data.success) {
             isAuthenticated = true;
             localStorage.setItem('isAuthenticated', 'true');
-            if (data.success) {
-                isAuthenticated = true;
-                localStorage.setItem('isAuthenticated', 'true');
-
-                updateLogoutButton();
-                updateAdminUI();
-                updatePrizeEditButtons();
-                loadHistory();
-
-                showAlert('Успешная авторизация!', true);
-                return true;
-            }
+            
+            updateLogoutButton();
+            updateAdminUI();
+            updatePrizeEditButtons();
+            bindPrizeEditButtons(); 
+            loadHistory();
+            
+            showAlert('Успешная авторизация!', true);
+            return true;
         } else {
             throw new Error('Ошибка авторизации');
         }
@@ -463,6 +498,12 @@ window.onload = () => {
   updateLogoutButton();
   updateAdminUI();
   updatePrizeEditButtons();
+
+  document.getElementById('add-history-btn')
+    ?.addEventListener('click', openAddModal);
+
   loadData();
   loadHistory();
 };
+
+
