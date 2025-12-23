@@ -464,3 +464,33 @@ video {
     height: 75px;
     object-fit: contain;
 }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.hidden { display: none; }
+
+.modal-content {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  width: 320px;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.date-row {
+  display: flex;
+  gap: 5px;
+}
