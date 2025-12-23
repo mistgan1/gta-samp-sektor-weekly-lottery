@@ -24,7 +24,8 @@
 		<div id="history">
 			<h2>История генераций:</h2>
 			<ul id="history-list"><h2><img src="winter_duck.gif"/> Загрузка данных...</h2></ul>
-			<button id="add-history-btn" style="display: none;">Добавить</button>	
+			<button id="add-history-btn" style="display: none;">Добавить</button>
+			<button id="save-to-log-btn" style="display: none; margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">Сохранить данные</button>	
 		</div>
 	</div>
 	
@@ -153,6 +154,18 @@
     </div>
   </div>
 </div>
-
+<div id="save-log-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Сохранить резерв в лог</h2>
+    
+    <label>Имя файла (ДД_ММ_ГГГГ.json):</label>
+    <input id="log-filename" type="text" placeholder="ДД_ММ_ГГГГ" style="width: 100%; margin: 10px 0; padding: 8px;">
+    
+    <div class="modal-actions">
+      <button onclick="confirmSaveLog()">Сохранить</button>
+      <button onclick="closeSaveLogModal()">Отмена</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
