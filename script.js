@@ -218,14 +218,21 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    const nickname = document.getElementById('input-name').value.trim();
+    const chosen = document.getElementById('input-chosen').value.trim();
+
+    const combinedName = chosen
+      ? `${nickname} ${chosen}`
+      : nickname;
+
     const payload = {
       date: document.getElementById('input-date').value.trim(),
       number: document.getElementById('input-number').value,
-      name: document.getElementById('input-name').value.trim(),
-      chosenNumber: document.getElementById('input-chosen').value,
+      name: combinedName,        // ⬅ ВАЖНО
       prize: document.getElementById('input-prize').value,
       mode: editMode ? 'edit' : 'add'
     };
+
 
     if (!payload.date || !payload.number) {
       showAlert('Дата и число обязательны', false);
