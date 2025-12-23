@@ -571,3 +571,54 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateTimer, 1000);
   updateTimer();
 });
+// ===================== Clear all squares =====================
+
+async function clearAllSquares() {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
+  if (!confirm('Вы уверены, что хотите ОСВОБОДИТЬ ВСЕ квадраты?\n\nЭто удалит все текущие резервы из names.json')) {
+    return;
+  }
+
+  try {
+    // Отправляем запрос на сервер для очистки
+    const res = await fetch(`${SERVER_URL}/clear-names`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}) // можно ничего не передавать
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Ошибка сервера');
+    }
+
+    // Обновляем интерфейс
+    document.querySelectorAll('.number-square.reserved').forEach(square => {
+      square.classList.remove('reserved');
+      square.removeAttribute('title');
+    });
+
+    showAlert('Все квадраты успешно очищены', true);
+  } catch (e) {
+    console.error(e);
+    showAlert('Не удалось очистить квадраты: ' + (e.message || 'неизвестная ошибка'), false);
+  }
+}
+
+// Привязываем обработчик
+document.getElementById('clear-all-squares-btn')?.addEventListener('click', clearAllSquares);
+
+// Добавляем видимость кнопки в updateAdminUI
+function updateAdminUI() {
+  const addBtn = document.getElementById('add-history-btn');
+  const saveLogBtn = document.getElementById('save-to-log-btn');
+  const clearBtn = document.getElementById('clear-all-squares-btn');
+  
+  if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
+  if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
+  if (clearBtn) clearBtn.style.display = isAuthenticated ? 'block' : 'none';
+}
