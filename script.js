@@ -28,12 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!logoutBtn) return;
     logoutBtn.style.display = isAuthenticated ? 'block' : 'none';
   }
-
-  function updateAdminUI() {
-    const btn = document.getElementById('add-history-btn');
-    if (!btn) return;
-    btn.style.display = isAuthenticated ? 'block' : 'none';
-  }
+  
+document.getElementById('save-to-log-btn')?.addEventListener('click', openSaveLogModal);
+function updateAdminUI() {
+  const addBtn = document.getElementById('add-history-btn');
+  const saveLogBtn = document.getElementById('save-to-log-btn');
+  
+  if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
+  if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
+}
 
   function updatePrizeEditButtons() {
     document.querySelectorAll('.edit-prize-btn').forEach(btn => {
@@ -498,3 +501,88 @@ async function deleteHistory(item) {
   loadHistory();
   updatePrizes();
 });
+
+// ------------------- Save to log -------------------
+
+function openSaveLogModal() {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
+  const defaultFilename = `${day}_${month}_${year}`;
+
+  document.getElementById('log-filename').value = defaultFilename;
+  
+  document.getElementById('save-log-modal').classList.remove('hidden');
+}
+
+function closeSaveLogModal() {
+  document.getElementById('save-log-modal').classList.add('hidden');
+}
+
+async function confirmSaveLog() {
+  const filenameInput = document.getElementById('log-filename').value.trim();
+  
+  if (!filenameInput) {
+    showAlert('Введите имя файла', false);
+    return;
+  }
+
+  // Проверяем/нормализуем формат ДД_ММ_ГГГГ
+  let finalFilename = filenameInput;
+  if (!finalFilename.endsWith('.json')) {
+    finalFilename += '.json';
+  }
+
+  // Минимальная проверка формата
+  if (!/^\d{2}_\d{2}_\d{4}\.json$/.test(finalFilename)) {
+    showAlert('Формат должен быть ДД_ММ_ГГГГ.json', false);
+    return;
+  }
+
+  if (!confirm(`Сохранить файл как\n${finalFilename}?`)) {
+    return;
+  }
+
+  try {
+    // 1. Получаем текущие данные names.json
+    const namesRes = await fetch(`${SERVER_URL}/names`);
+    if (!namesRes.ok) throw new Error('Не удалось загрузить names.json');
+    const namesData = await namesRes.json();
+
+    // 2. Формируем путь в репозитории
+    const logPath = `log/${finalFilename}`;
+
+    // 3. Отправляем на сервер команду сохранить
+    const saveRes = await fetch(`${SERVER_URL}/save-to-log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: logPath,
+        content: namesData
+      })
+    });
+
+    if (!saveRes.ok) {
+      const err = await saveRes.json();
+      throw new Error(err.message || 'Ошибка сохранения');
+    }
+
+    closeSaveLogModal();
+    showAlert(`Файл ${finalFilename} успешно сохранён в log/`, true);
+    
+  } catch (e) {
+    console.error(e);
+    showAlert('Не удалось сохранить файл: ' + e.message, false);
+  }
+}
+
+// Экспортируем для onclick
+window.openSaveLogModal = openSaveLogModal;
+window.closeSaveLogModal = closeSaveLogModal;
+window.confirmSaveLog = confirmSaveLog;
