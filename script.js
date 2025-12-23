@@ -31,14 +31,30 @@ for (let i = 1; i <= 100; i++) {
 }
 
 function openAddModal() {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
   editMode = false;
   currentEdit = null;
+
   document.getElementById('modal-title').innerText = 'Добавить запись';
   document.getElementById('admin-modal').classList.remove('hidden');
   loadPrizesToSelect();
 }
 
+function closeModal() {
+  document.getElementById('admin-modal').classList.add('hidden');
+}
+
+
 function openEditModal(item) {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
   editMode = true;
   currentEdit = item;
 
@@ -47,10 +63,11 @@ function openEditModal(item) {
   document.getElementById('input-number').value = item.number;
   document.getElementById('input-name').value = item.name || '';
   document.getElementById('input-chosen').value = item.chosenNumber || '';
-  document.getElementById('admin-modal').classList.remove('hidden');
 
+  document.getElementById('admin-modal').classList.remove('hidden');
   loadPrizesToSelect(item.prize);
 }
+
 function formatDate(d) {
   return d.toLocaleDateString('ru-RU');
 }
@@ -79,29 +96,45 @@ async function loadPrizesToSelect(selected) {
 }
 
 async function saveHistory() {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
   const payload = {
-    date: document.getElementById('input-date').value,
+    date: document.getElementById('input-date').value.trim(),
     number: document.getElementById('input-number').value,
-    name: document.getElementById('input-name').value,
+    name: document.getElementById('input-name').value.trim(),
     chosenNumber: document.getElementById('input-chosen').value,
     prize: document.getElementById('input-prize').value,
     mode: editMode ? 'edit' : 'add'
   };
 
-  const res = await fetch(`${SERVER_URL}/save-history`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  if (!payload.date || !payload.number) {
+    showAlert('Дата и число обязательны', false);
+    return;
+  }
 
-  if (res.ok) {
+  try {
+    const res = await fetch(`${SERVER_URL}/save-history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error('Ошибка сервера');
+    }
+
     closeModal();
     loadHistory();
     showAlert('Запись сохранена', true);
-  } else {
+  } catch (e) {
+    console.error(e);
     showAlert('Ошибка сохранения', false);
   }
 }
+
 
 
 async function loadData() {
@@ -139,10 +172,7 @@ async function loadHistory() {
             if (isAuthenticated) {
                 const editBtn = listItem.querySelector('.edit-btn');
                 editBtn.addEventListener('click', () => {
-                    const name = prompt('Введите никнейм победителя:');
-                    if (name !== null) {
-                        updateWinner(item.date, item.number, name);
-                    }
+                    openEditModal(item);
                 });
             }
         });
