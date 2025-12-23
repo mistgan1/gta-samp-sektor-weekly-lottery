@@ -28,15 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!logoutBtn) return;
     logoutBtn.style.display = isAuthenticated ? 'block' : 'none';
   }
-  
-document.getElementById('save-to-log-btn')?.addEventListener('click', openSaveLogModal);
-function updateAdminUI() {
-  const addBtn = document.getElementById('add-history-btn');
-  const saveLogBtn = document.getElementById('save-to-log-btn');
-  
-  if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
-  if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
-}
+
+  function updateAdminUI() {
+    const addBtn = document.getElementById('add-history-btn');
+    const saveLogBtn = document.getElementById('save-to-log-btn');
+    
+    if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
+    if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
+  }
 
   function updatePrizeEditButtons() {
     document.querySelectorAll('.edit-prize-btn').forEach(btn => {
@@ -44,7 +43,7 @@ function updateAdminUI() {
     });
   }
 
-  // ===================== Modal =====================
+  // ===================== Modal (history) =====================
   function closeModal() {
     document.getElementById('admin-modal')?.classList.add('hidden');
   }
@@ -90,35 +89,37 @@ function updateAdminUI() {
   function formatDate(d) {
     return d.toLocaleDateString('ru-RU');
   }
+
   function setToday() {
     document.getElementById('input-date').value = formatDate(new Date());
   }
+
   function setYesterday() {
     const d = new Date();
     d.setDate(d.getDate() - 1);
     document.getElementById('input-date').value = formatDate(d);
   }
 
-  // экспорт для inline onclick
-  window.closeModal = closeModal;
-  window.saveHistory = saveHistory;
-  window.setToday = setToday;
-  window.setYesterday = setYesterday;
-
   // ===================== Data =====================
   async function loadPrizesToSelect(selected) {
-    const res = await fetch(`${SERVER_URL}/prizes`);
-    const prizes = await res.json();
-    const select = document.getElementById('input-prize');
-    select.innerHTML = '<option value="">—</option>';
+    try {
+      const res = await fetch(`${SERVER_URL}/prizes`);
+      const prizes = await res.json();
+      const select = document.getElementById('input-prize');
+      if (!select) return;
 
-    prizes.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.prize;
-      opt.textContent = p.prize;
-      if (p.prize === selected) opt.selected = true;
-      select.appendChild(opt);
-    });
+      select.innerHTML = '<option value="">—</option>';
+
+      prizes.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.prize;
+        opt.textContent = p.prize;
+        if (p.prize === selected) opt.selected = true;
+        select.appendChild(opt);
+      });
+    } catch (e) {
+      console.error('Ошибка загрузки призов для селекта:', e);
+    }
   }
 
   async function loadData() {
@@ -139,7 +140,6 @@ function updateAdminUI() {
   }
 
   // ===================== HISTORY + AUTOSCROLL =====================
-
   function scrollHistoryToBottom() {
     const history = document.getElementById('history');
     if (!history) return;
@@ -161,9 +161,11 @@ function updateAdminUI() {
 
   async function loadHistory() {
     try {
-      const response = await fetch(`${SERVER_URL}/history?ts=${Date.now()}`)
+      const response = await fetch(`${SERVER_URL}/history?ts=${Date.now()}`);
       const history = await response.json();
       const historyList = document.getElementById('history-list');
+      if (!historyList) return;
+
       historyList.innerHTML = '';
 
       history.forEach(item => {
@@ -173,7 +175,7 @@ function updateAdminUI() {
           ${isAuthenticated ? `
             <button class="edit-btn">✏</button>
             <button class="delete-btn">🗑</button>
-            ` : ''}
+          ` : ''}
           <span class="winner-name">
             ${item.name || ''}
             ${item.prize ? `<img src="pic/${item.prize}.png" class="winner-prize-icon">` : ''}
@@ -182,13 +184,9 @@ function updateAdminUI() {
         historyList.appendChild(li);
 
         if (isAuthenticated) {
-        li.querySelector('.edit-btn')
-            ?.addEventListener('click', () => openEditModal(item));
-
-        li.querySelector('.delete-btn')
-            ?.addEventListener('click', () => deleteHistory(item));
+          li.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
+          li.querySelector('.delete-btn')?.addEventListener('click', () => deleteHistory(item));
         }
-
       });
 
       scrollHistoryToBottom();
@@ -199,7 +197,7 @@ function updateAdminUI() {
 
   async function updatePrizes() {
     try {
-      const response = await fetch(`${SERVER_URL}/prizes?ts=${Date.now()}`)
+      const response = await fetch(`${SERVER_URL}/prizes?ts=${Date.now()}`);
       if (!response.ok) throw new Error('Ошибка загрузки призов');
 
       const prizes = await response.json();
@@ -213,77 +211,73 @@ function updateAdminUI() {
   }
 
   // ===================== Save history =====================
-async function saveHistory() {
-  if (!isAuthenticated) {
-    showAlert('Нет доступа', false);
-    return;
-  }
-
-  const nameValue = document
-    .getElementById('input-name')
-    .value
-    .trim();
-
-  const payload = {
-    date: document.getElementById('input-date').value.trim(),
-    number: document.getElementById('input-number').value,
-    name: nameValue, 
-    prize: document.getElementById('input-prize').value,
-    mode: editMode ? 'edit' : 'add'
-  };
-
-  if (!payload.date || !payload.number || !payload.name) {
-    showAlert('Дата, число и ник обязательны', false);
-    return;
-  }
-
-  try {
-    const res = await fetch(`${SERVER_URL}/save-history`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error();
-
-    closeModal();
-    await loadHistory();
-    await updatePrizes();
-    showAlert('Запись сохранена', true);
-  } catch (e) {
-    console.error(e);
-    showAlert('Ошибка сохранения', false);
-  }
-}
-
-
-async function deleteHistory(item) {
-  if (!isAuthenticated) {
-    showAlert('Нет доступа', false);
-    return;
-  }
-
-  if (!confirm(`Удалить запись?\n\nДата: ${item.date}\nЧисло: ${item.number}`)) return;
-
-  try {
-    const res = await fetch(`${SERVER_URL}/history/${encodeURIComponent(item.date)}/${item.number}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Ошибка сервера');
+  async function saveHistory() {
+    if (!isAuthenticated) {
+      showAlert('Нет доступа', false);
+      return;
     }
 
-    await loadHistory();
-    await updatePrizes();
-    showAlert('Запись удалена', true);
-  } catch (e) {
-    console.error(e);
-    showAlert('Не удалось удалить запись: ' + (e.message || 'неизвестная ошибка'), false);
+    const nameValue = document.getElementById('input-name')?.value?.trim();
+
+    const payload = {
+      date: document.getElementById('input-date')?.value?.trim(),
+      number: document.getElementById('input-number')?.value,
+      name: nameValue,
+      prize: document.getElementById('input-prize')?.value,
+      mode: editMode ? 'edit' : 'add'
+    };
+
+    if (!payload.date || !payload.number || !payload.name) {
+      showAlert('Дата, число и ник обязательны', false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${SERVER_URL}/save-history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error();
+
+      closeModal();
+      await loadHistory();
+      await updatePrizes();
+      showAlert('Запись сохранена', true);
+    } catch (e) {
+      console.error(e);
+      showAlert('Ошибка сохранения', false);
+    }
   }
-}
+
+  async function deleteHistory(item) {
+    if (!isAuthenticated) {
+      showAlert('Нет доступа', false);
+      return;
+    }
+
+    if (!confirm(`Удалить запись?\n\nДата: ${item.date}\nЧисло: ${item.number}`)) return;
+
+    try {
+      const res = await fetch(`${SERVER_URL}/history/${encodeURIComponent(item.date)}/${item.number}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Ошибка сервера');
+      }
+
+      await loadHistory();
+      await updatePrizes();
+      showAlert('Запись удалена', true);
+    } catch (e) {
+      console.error(e);
+      showAlert('Не удалось удалить запись: ' + (e.message || 'неизвестная ошибка'), false);
+    }
+  }
 
   // ===================== Prize edit =====================
   async function updatePrizeCount(prize, count) {
@@ -376,8 +370,6 @@ async function deleteHistory(item) {
     window.location.reload();
   }
 
-  document.getElementById('logout-btn')?.addEventListener('click', logout);
-
   // ===================== Grid + click =====================
   if (isMobile()) {
     const video = document.querySelector('video');
@@ -440,8 +432,6 @@ async function deleteHistory(item) {
     });
   });
 
-  document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
-
   // ===================== Timer =====================
   function calculateNextDate() {
     const now = new Date();
@@ -488,8 +478,85 @@ async function deleteHistory(item) {
     if (timerEl) timerEl.innerText = `${days} д. ${hours} ч. ${minutes} мин. ${seconds} сек.`;
   }
 
-  setInterval(updateTimer, 1000);
-  updateTimer();
+  // ===================== Save to log functionality =====================
+
+  function openSaveLogModal() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const defaultFilename = `${day}_${month}_${year}`;
+
+    document.getElementById('log-filename').value = defaultFilename;
+    document.getElementById('save-log-modal').classList.remove('hidden');
+  }
+
+  function closeSaveLogModal() {
+    document.getElementById('save-log-modal').classList.add('hidden');
+  }
+
+  async function confirmSaveLog() {
+    const filenameInput = document.getElementById('log-filename')?.value?.trim();
+
+    if (!filenameInput) {
+      showAlert('Введите имя файла', false);
+      return;
+    }
+
+    let finalFilename = filenameInput;
+    if (!finalFilename.endsWith('.json')) finalFilename += '.json';
+
+    if (!/^\d{2}_\d{2}_\d{4}\.json$/.test(finalFilename)) {
+      showAlert('Формат должен быть ДД_ММ_ГГГГ.json', false);
+      return;
+    }
+
+    if (!confirm(`Сохранить файл как\n${finalFilename}?`)) return;
+
+    try {
+      const namesRes = await fetch(`${SERVER_URL}/names`);
+      if (!namesRes.ok) throw new Error('Не удалось загрузить names');
+
+      const namesData = await namesRes.json();
+
+      const logPath = `log/${finalFilename}`;
+
+      const saveRes = await fetch(`${SERVER_URL}/save-to-log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: logPath, content: namesData })
+      });
+
+      if (!saveRes.ok) {
+        const err = await saveRes.json().catch(() => ({}));
+        throw new Error(err.message || 'Ошибка сервера');
+      }
+
+      closeSaveLogModal();
+      showAlert(`Файл ${finalFilename} успешно сохранён в log/`, true);
+    } catch (e) {
+      console.error(e);
+      showAlert('Не удалось сохранить: ' + (e.message || 'неизвестная ошибка'), false);
+    }
+  }
+
+  // ===================== Event Listeners =====================
+
+  document.getElementById('logout-btn')?.addEventListener('click', logout);
+  document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
+
+  // Кнопка открытия модалки сохранения в лог
+  document.getElementById('save-to-log-btn')?.addEventListener('click', () => {
+    if (!isAuthenticated) {
+      showAlert('Нет доступа', false);
+      return;
+    }
+    openSaveLogModal();
+  });
+
+  // Кнопки внутри модального окна сохранения в лог
+  document.getElementById('confirm-save-log-btn')?.addEventListener('click', confirmSaveLog);
+  document.getElementById('cancel-save-log-btn')?.addEventListener('click', closeSaveLogModal);
 
   // ===================== Init =====================
   updateLogoutButton();
@@ -500,98 +567,7 @@ async function deleteHistory(item) {
   loadData();
   loadHistory();
   updatePrizes();
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
 });
-const confirmBtn = document.getElementById('confirm-save-log-btn');
-const cancelBtn = document.getElementById('cancel-save-log-btn');
-
-if (confirmBtn) {
-    confirmBtn.addEventListener('click', confirmSaveLog);
-}
-
-if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeSaveLogModal);
-}
-
-// ------------------- Save to log -------------------
-
-const saveLogBtn = document.getElementById('save-to-log-btn');
-    if (saveLogBtn) {
-        saveLogBtn.addEventListener('click', () => {
-            if (!isAuthenticated) {
-                showAlert('Нет доступа', false);
-                return;
-            }
-            openSaveLogModal(); 
-        });
-    }
-
-function openSaveLogModal() {
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const defaultFilename = `${day}_${month}_${year}`;
-
-    document.getElementById('log-filename').value = defaultFilename;
-    document.getElementById('save-log-modal').classList.remove('hidden');
-}    
-function closeSaveLogModal() {
-  document.getElementById('save-log-modal').classList.add('hidden');
-}
-
-async function confirmSaveLog() {
-    const filenameInput = document.getElementById('log-filename').value.trim();
-    
-    if (!filenameInput) {
-        showAlert('Введите имя файла', false);
-        return;
-    }
-
-    let finalFilename = filenameInput;
-    if (!finalFilename.endsWith('.json')) {
-        finalFilename += '.json';
-    }
-
-    if (!/^\d{2}_\d{2}_\d{4}\.json$/.test(finalFilename)) {
-        showAlert('Формат должен быть ДД_ММ_ГГГГ.json', false);
-        return;
-    }
-
-    if (!confirm(`Сохранить файл как\n${finalFilename}?`)) {
-        return;
-    }
-
-    try {
-        const namesRes = await fetch(`${SERVER_URL}/names`);
-        if (!namesRes.ok) throw new Error('Не удалось загрузить names.json');
-        const namesData = await namesRes.json();
-
-        const logPath = `log/${finalFilename}`;
-
-        const saveRes = await fetch(`${SERVER_URL}/save-to-log`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                path: logPath,
-                content: namesData
-            })
-        });
-
-        if (!saveRes.ok) {
-            const err = await saveRes.json();
-            throw new Error(err.message || 'Ошибка сохранения');
-        }
-
-        closeSaveLogModal();
-        showAlert(`Файл ${finalFilename} успешно сохранён в log/`, true);
-        
-    } catch (e) {
-        console.error(e);
-        showAlert('Не удалось сохранить: ' + (e.message || 'неизвестная ошибка'), false);
-    }
-}
-
-// Экспортируем для onclick
-window.openSaveLogModal = openSaveLogModal;
-window.closeSaveLogModal = closeSaveLogModal;
-window.confirmSaveLog = confirmSaveLog;
