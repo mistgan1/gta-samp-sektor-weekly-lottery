@@ -169,7 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.innerHTML = `
           <span>${item.date}: ${item.number}</span>
-          ${isAuthenticated ? '<button class="edit-btn">✏</button>' : ''}
+          ${isAuthenticated ? `
+            <button class="edit-btn">✏</button>
+            <button class="delete-btn">🗑</button>
+            ` : ''}
           <span class="winner-name">
             ${item.name || ''}
             ${item.prize ? `<img src="pic/${item.prize}.png" class="winner-prize-icon">` : ''}
@@ -178,8 +181,13 @@ document.addEventListener('DOMContentLoaded', () => {
         historyList.appendChild(li);
 
         if (isAuthenticated) {
-          li.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
+        li.querySelector('.edit-btn')
+            ?.addEventListener('click', () => openEditModal(item));
+
+        li.querySelector('.delete-btn')
+            ?.addEventListener('click', () => deleteHistory(item));
         }
+
       });
 
       scrollHistoryToBottom();
@@ -241,6 +249,38 @@ document.addEventListener('DOMContentLoaded', () => {
       showAlert('Ошибка сохранения', false);
     }
   }
+
+async function deleteHistory(item) {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
+  }
+
+  const ok = confirm(
+    `Удалить запись?\n\nДата: ${item.date}\nЧисло: ${item.number}`
+  );
+  if (!ok) return;
+
+  try {
+    const res = await fetch(`${SERVER_URL}/delete-history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: item.date,
+        number: item.number
+      })
+    });
+
+    if (!res.ok) throw new Error();
+
+    await loadHistory();
+    await updatePrizes();
+    showAlert('Запись удалена', true);
+  } catch (e) {
+    console.error(e);
+    showAlert('Ошибка удаления', false);
+  }
+}
 
   // ===================== Prize edit =====================
   async function updatePrizeCount(prize, count) {
