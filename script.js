@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input-date').value = '';
     document.getElementById('input-number').value = '';
     document.getElementById('input-name').value = '';
-    document.getElementById('input-chosen').value = '';
     document.getElementById('input-prize').value = '';
 
     document.getElementById('admin-modal').classList.remove('hidden');
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input-date').value = item.date || '';
     document.getElementById('input-number').value = item.number ?? '';
     document.getElementById('input-name').value = item.name || '';
-    document.getElementById('input-chosen').value = item.chosenNumber ?? '';
 
     document.getElementById('admin-modal').classList.remove('hidden');
     loadPrizesToSelect(item.prize);
@@ -212,50 +210,49 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===================== Save history =====================
-  async function saveHistory() {
-    if (!isAuthenticated) {
-      showAlert('Нет доступа', false);
-      return;
-    }
-
-    const nickname = document.getElementById('input-name').value.trim();
-    const chosen = document.getElementById('input-chosen').value.trim();
-
-    const combinedName = chosen
-      ? `${nickname} ${chosen}`
-      : nickname;
-
-    const payload = {
-      date: document.getElementById('input-date').value.trim(),
-      number: document.getElementById('input-number').value,
-      name: combinedName,        // ⬅ ВАЖНО
-      prize: document.getElementById('input-prize').value,
-      mode: editMode ? 'edit' : 'add'
-    };
-
-
-    if (!payload.date || !payload.number) {
-      showAlert('Дата и число обязательны', false);
-      return;
-    }
-
-    try {
-      const res = await fetch(`${SERVER_URL}/save-history`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error('Ошибка сервера');
-
-      closeModal();
-      await loadHistory();
-      await updatePrizes();
-      showAlert('Запись сохранена', true);
-    } catch (e) {
-      console.error(e);
-      showAlert('Ошибка сохранения', false);
-    }
+async function saveHistory() {
+  if (!isAuthenticated) {
+    showAlert('Нет доступа', false);
+    return;
   }
+
+  const nameValue = document
+    .getElementById('input-name')
+    .value
+    .trim();
+
+  const payload = {
+    date: document.getElementById('input-date').value.trim(),
+    number: document.getElementById('input-number').value,
+    name: nameValue, 
+    prize: document.getElementById('input-prize').value,
+    mode: editMode ? 'edit' : 'add'
+  };
+
+  if (!payload.date || !payload.number || !payload.name) {
+    showAlert('Дата, число и ник обязательны', false);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SERVER_URL}/save-history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error();
+
+    closeModal();
+    await loadHistory();
+    await updatePrizes();
+    showAlert('Запись сохранена', true);
+  } catch (e) {
+    console.error(e);
+    showAlert('Ошибка сохранения', false);
+  }
+}
+
 
 async function deleteHistory(item) {
   if (!isAuthenticated) {
