@@ -17,61 +17,117 @@
 
     <div class="numbers-grid" id="numbers-grid"></div>
 
-	<div class="container">
-		<h1 id="status">Вторник и суббота в 00:01</h1>
-		<h1 id="status">До генерации осталось:</h1>
-		<div id="timer"></div>
+    <div class="container">
+        <h1 id="status">Вторник и суббота в 00:01</h1>
+        <h1 id="status">До генерации осталось:</h1>
+        <div id="timer"></div>
 
+        <!-- Кнопки админа — всегда видны после авторизации -->
+        <div class="admin-buttons" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+            <button id="add-history-btn" style="display: none; padding: 10px 20px; background: #ffcc00; color: black; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                Добавить запись
+            </button>
+            <button id="save-to-log-btn" style="display: none; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                Сохранить данные в JSON
+            </button>
+            <button id="clear-all-squares-btn" style="display: none; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                Очистить все квадраты
+            </button>
+        </div>
 
-    <div class="admin-buttons" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-        <button id="add-history-btn" style="display: none; padding: 10px 20px; background: #ffcc00; color: black; border: none; border-radius: 8px; cursor: pointer;">
-            Добавить запись
-        </button>
-        <button id="save-to-log-btn" style="display: none; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">
-            Сохранить данные в JSON
-        </button>
-        <button id="clear-all-squares-btn" style="display: none; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 8px; cursor: pointer;">
-            Очистить все квадраты
-        </button>
+        <div id="history">
+            <h2>История генераций:</h2>
+            <ul id="history-list">
+                <li><img src="winter_duck.gif"/> Загрузка данных...</li>
+            </ul>
+        </div>
     </div>
 
-		<div id="history">
-			<h2>История генераций:</h2>
-			<ul id="history-list"><h2><img src="winter_duck.gif"/> Загрузка данных...</h2>
-		</div>
-	</div>
-	
-	<div class="logout-container">
-		<button id="logout-btn">Выйти</button>
-	</div>
-	
-	<div class="prize-list-container">
-		<h2 class="prize-title">Уже выиграли</h2>
-		<div class="prizes">
-			<div class="prize-item">
-				<span class="image-count" id="count-coupons">Купоны<sup>7</sup></span>
-				<img src="pic/coupons.png" alt="coupons">
-				<span class="image-count" id="count-coupons-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="coupons" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-berry">Конфеты<sup>2</sup></span>
-				<img src="pic/berry.png" alt="berry">
-				<span class="image-count" id="count-berry-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="berry" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-dragon">Дракон<sup>7</sup></span>
-				<img src="pic/dragon.png" alt="dragon">
-				<span class="image-count" id="count-dragon-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="dragon" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-krasnorech">Красноречие<sup>7</sup></span>
-				<img src="pic/krasnorech.png" alt="krasnorech">
-				<span class="image-count" id="count-krasnorech-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="krasnorech" style="display: none;">✎</button>
-			</div>
+    <div class="logout-container">
+        <button id="logout-btn">Выйти</button>
+    </div>
+
+    <div class="prize-list-container">
+        <h2 class="prize-title">Уже выиграли</h2>
+        <div class="prizes">
+            <div class="prize-item">
+                <span class="image-count" id="count-coupons">Купоны<sup>7</sup></span>
+                <img src="pic/coupons.png" alt="coupons">
+                <span class="image-count" id="count-coupons-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="coupons" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-berry">Конфеты<sup>2</sup></span>
+                <img src="pic/berry.png" alt="berry">
+                <span class="image-count" id="count-berry-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="berry" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-dragon">Дракон<sup>7</sup></span>
+                <img src="pic/dragon.png" alt="dragon">
+                <span class="image-count" id="count-dragon-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="dragon" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-krasnorech">Красноречие<sup>7</sup></span>
+                <img src="pic/krasnorech.png" alt="krasnorech">
+                <span class="image-count" id="count-krasnorech-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="krasnorech" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-vedma">Ведьмино<sup>5</sup></span>
+                <img src="pic/vedma.png" alt="vedma">
+                <span class="image-count" id="count-vedma-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="vedma" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-nemota">Немота<sup>5</sup></span>
+                <img src="pic/nemota.png" alt="nemota">
+                <span class="image-count" id="count-nemota-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="nemota" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-heavy">Тяжесть<sup>7</sup></span>
+                <img src="pic/heavy.png" alt="heavy">
+                <span class="image-count" id="count-heavy-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="heavy" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-otluch">Отлучение<sup>7</sup></span>
+                <img src="pic/otluch.png" alt="otluch">
+                <span class="image-count" id="count-otluch-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="otluch" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-present">Подарки<sup>10</sup></span>
+                <img src="pic/present.png" alt="present">
+                <span class="image-count" id="count-present-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="present" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-5kk">5kk вирт</span>
+                <img src="pic/5kk.png" alt="5kk">
+                <span class="image-count" id="count-5kk-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="5kk" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-santa">Санта</span>
+                <img src="pic/santa.png" alt="santa">
+                <span class="image-count" id="count-santa-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="santa" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-valentin">Валентин</span>
+                <img src="pic/valentin.png" alt="valentin">
+                <span class="image-count" id="count-valentin-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="valentin" style="display: none;">✎</button>
+            </div>
+            <div class="prize-item">
+                <span class="image-count" id="count-rep">Репутация</span>
+                <img src="pic/rep.png" alt="rep">
+                <span class="image-count" id="count-rep-value"><img src="winter_load.gif"/></span>
+                <button class="edit-prize-btn" data-prize="rep" style="display: none;">✎</button>
+            </div>
 			<!--<div class="prize-item">
 				<span class="image-count" id="count-gorgon">Горгона</span>
 				<img src="pic/gorgon.png" alt="gorgon">
@@ -83,101 +139,50 @@
 				<img src="pic/goldenapple.png" alt="goldapple">
 				<span class="image-count" id="count-goldapple-value"><img src="winter_load.gif"/></span>
 			</div>-->
-			<div class="prize-item">
-				<span class="image-count" id="count-vedma">Ведьмино<sup>5</sup></span>
-				<img src="pic/vedma.png" alt="vedma">
-				<span class="image-count" id="count-vedma-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="vedma" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-nemota">Немота<sup>5</sup></span>
-				<img src="pic/nemota.png" alt="nemota">
-				<span class="image-count" id="count-nemota-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="nemota" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-heavy">Тяжесть<sup>7</sup></span>
-				<img src="pic/heavy.png" alt="heavy">
-				<span class="image-count" id="count-heavy-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="heavy" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-otluch">Отлучение<sup>7</sup></span>
-				<img src="pic/otluch.png" alt="otluch">
-				<span class="image-count" id="count-otluch-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="otluch" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-present">Подарки<sup>10</sup></span>
-				<img src="pic/present.png" alt="present">
-				<span class="image-count" id="count-present-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="present" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-5kk">5kk вирт<sup></sup></span>
-				<img src="pic/5kk.png" alt="5kk">
-				<span class="image-count" id="count-5kk-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="5kk" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-santa">Санта</span>
-				<img src="pic/santa.png" alt="santa">
-				<span class="image-count" id="count-santa-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="santa" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-valentin">Валентин</span>
-				<img src="pic/valentin.png" alt="valentin">
-				<span class="image-count" id="count-valentin-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="valentin" style="display: none;">✎</button>
-			</div>
-			<div class="prize-item">
-				<span class="image-count" id="count-rep">Репутация</span>
-				<img src="pic/rep.png" alt="rep">
-				<span class="image-count" id="count-rep-value"><img src="winter_load.gif"/></span>
-				<button class="edit-prize-btn" data-prize="rep" style="display: none;">✎</button>
-			</div>
-		</div>
-	</div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
-<div id="admin-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2 id="modal-title">Добавить запись</h2>
 
-    <label>Дата:</label>
-    <div class="date-row">
-      <input id="input-date" placeholder="ДД.ММ.ГГГГ">
-      <button onclick="setToday()">Сегодня</button>
-      <button onclick="setYesterday()">Вчера</button>
+    <div id="admin-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-title">Добавить запись</h2>
+
+            <label>Дата:</label>
+            <div class="date-row">
+                <input id="input-date" placeholder="ДД.ММ.ГГГГ">
+                <button id="set-today-btn">Сегодня</button>
+                <button id="set-yesterday-btn">Вчера</button>
+            </div>
+
+            <label>Сгенерированное число:</label>
+            <input id="input-number" type="number">
+
+            <label>Ник победителя:</label>
+            <input id="input-name">
+
+            <label>Приз:</label>
+            <select id="input-prize"></select>
+
+            <div class="modal-actions">
+                <button id="save-history-btn">Сохранить</button>
+                <button id="cancel-history-btn">Отмена</button>
+            </div>
+        </div>
     </div>
 
-    <label>Сгенерированное число:</label>
-    <input id="input-number" type="number">
-
-    <label>Ник победителя:</label>
-    <input id="input-name">
-
-    <label>Приз:</label>
-    <select id="input-prize"></select>
-
-    <div class="modal-actions">
-      <button onclick="saveHistory()">Сохранить</button>
-      <button onclick="closeModal()">Отмена</button>
+    <div id="save-log-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Сохранить резерв в лог</h2>
+            
+            <label>Имя файла (ДД_ММ_ГГГГ.json):</label>
+            <input id="log-filename" type="text" placeholder="ДД_ММ_ГГГГ" style="width: 100%; margin: 10px 0; padding: 8px;">
+            
+            <div class="modal-actions">
+                <button id="confirm-save-log-btn">Сохранить</button>
+                <button id="cancel-save-log-btn">Отмена</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<div id="save-log-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Сохранить резерв в лог</h2>
-    
-    <label>Имя файла (ДД_ММ_ГГГГ.json):</label>
-    <input id="log-filename" type="text" placeholder="ДД_ММ_ГГГГ" style="width: 100%; margin: 10px 0; padding: 8px;">
-    
-    <div class="modal-actions">
-      <button id="confirm-save-log-btn">Сохранить</button>
-      <button id="cancel-save-log-btn">Отмена</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>

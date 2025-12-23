@@ -32,12 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateAdminUI() {
     const addBtn = document.getElementById('add-history-btn');
     const saveLogBtn = document.getElementById('save-to-log-btn');
-    
+    const clearBtn = document.getElementById('clear-all-squares-btn');
+
     if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
     if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
-  }
+    if (clearBtn) clearBtn.style.display = isAuthenticated ? 'block' : 'none';
 
-  function updatePrizeEditButtons() {
+    // Также обновляем кнопки редактирования призов
     document.querySelectorAll('.edit-prize-btn').forEach(btn => {
       btn.style.display = isAuthenticated ? 'inline-block' : 'none';
     });
@@ -338,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       updateLogoutButton();
       updateAdminUI();
-      updatePrizeEditButtons();
       bindPrizeEditButtons();
       await loadHistory();
 
@@ -479,7 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===================== Save to log functionality =====================
-
   function openSaveLogModal() {
     const today = new Date();
     const day = String(today.getDate()).padStart(2, '0');
@@ -540,12 +539,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===================== Clear all squares =====================
+  async function clearAllSquares() {
+    if (!isAuthenticated) {
+      showAlert('Нет доступа', false);
+      return;
+    }
+
+    if (!confirm('Вы уверены, что хотите ОСВОБОДИТЬ ВСЕ квадраты?\n\nЭто удалит все текущие резервы из names.json')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${SERVER_URL}/clear-names`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Ошибка сервера');
+      }
+
+      // Обновляем интерфейс
+      document.querySelectorAll('.number-square.reserved').forEach(square => {
+        square.classList.remove('reserved');
+        square.removeAttribute('title');
+      });
+
+      showAlert('Все квадраты успешно очищены', true);
+    } catch (e) {
+      console.error(e);
+      showAlert('Не удалось очистить квадраты: ' + (e.message || 'неизвестная ошибка'), false);
+    }
+  }
+
   // ===================== Event Listeners =====================
-
   document.getElementById('logout-btn')?.addEventListener('click', logout);
-  document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
 
-  // Кнопка открытия модалки сохранения в лог
+  // Админ-кнопки
+  document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
   document.getElementById('save-to-log-btn')?.addEventListener('click', () => {
     if (!isAuthenticated) {
       showAlert('Нет доступа', false);
@@ -553,15 +587,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     openSaveLogModal();
   });
+  document.getElementById('clear-all-squares-btn')?.addEventListener('click', clearAllSquares);
 
-  // Кнопки внутри модального окна сохранения в лог
+  // Кнопки модального окна добавления/редактирования
+  document.getElementById('set-today-btn')?.addEventListener('click', setToday);
+  document.getElementById('set-yesterday-btn')?.addEventListener('click', setYesterday);
+  document.getElementById('save-history-btn')?.addEventListener('click', saveHistory);
+  document.getElementById('cancel-history-btn')?.addEventListener('click', closeModal);
+
+  // Кнопки модального окна сохранения в лог
   document.getElementById('confirm-save-log-btn')?.addEventListener('click', confirmSaveLog);
   document.getElementById('cancel-save-log-btn')?.addEventListener('click', closeSaveLogModal);
 
   // ===================== Init =====================
   updateLogoutButton();
   updateAdminUI();
-  updatePrizeEditButtons();
   bindPrizeEditButtons();
 
   loadData();
@@ -571,54 +611,3 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateTimer, 1000);
   updateTimer();
 });
-// ===================== Clear all squares =====================
-
-async function clearAllSquares() {
-  if (!isAuthenticated) {
-    showAlert('Нет доступа', false);
-    return;
-  }
-
-  if (!confirm('Вы уверены, что хотите ОСВОБОДИТЬ ВСЕ квадраты?\n\nЭто удалит все текущие резервы из names.json')) {
-    return;
-  }
-
-  try {
-    // Отправляем запрос на сервер для очистки
-    const res = await fetch(`${SERVER_URL}/clear-names`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}) // можно ничего не передавать
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Ошибка сервера');
-    }
-
-    // Обновляем интерфейс
-    document.querySelectorAll('.number-square.reserved').forEach(square => {
-      square.classList.remove('reserved');
-      square.removeAttribute('title');
-    });
-
-    showAlert('Все квадраты успешно очищены', true);
-  } catch (e) {
-    console.error(e);
-    showAlert('Не удалось очистить квадраты: ' + (e.message || 'неизвестная ошибка'), false);
-  }
-}
-
-// Привязываем обработчик
-document.getElementById('clear-all-squares-btn')?.addEventListener('click', clearAllSquares);
-
-// Добавляем видимость кнопки в updateAdminUI
-function updateAdminUI() {
-  const addBtn = document.getElementById('add-history-btn');
-  const saveLogBtn = document.getElementById('save-to-log-btn');
-  const clearBtn = document.getElementById('clear-all-squares-btn');
-  
-  if (addBtn) addBtn.style.display = isAuthenticated ? 'block' : 'none';
-  if (saveLogBtn) saveLogBtn.style.display = isAuthenticated ? 'block' : 'none';
-  if (clearBtn) clearBtn.style.display = isAuthenticated ? 'block' : 'none';
-}
