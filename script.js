@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
-  // ===== UI helpers =====
+  // ===================== Alerts =====================
   function showAlert(message, isSuccess) {
     const alertContainer = document.getElementById('alert-container');
     if (!alertContainer) return;
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => alert.remove(), 3000);
   }
 
+  // ===================== Admin UI =====================
   function updateLogoutButton() {
     const logoutBtn = document.getElementById('logout-btn');
     if (!logoutBtn) return;
@@ -40,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ===== Modal =====
+  // ===================== Modal =====================
   function closeModal() {
     document.getElementById('admin-modal')?.classList.add('hidden');
   }
@@ -54,14 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
     editMode = false;
     currentEdit = null;
 
-    // очистка полей (чтобы не тянуло старые значения)
+    document.getElementById('modal-title').innerText = 'Добавить запись';
+
+    // очистка
     document.getElementById('input-date').value = '';
     document.getElementById('input-number').value = '';
     document.getElementById('input-name').value = '';
     document.getElementById('input-chosen').value = '';
     document.getElementById('input-prize').value = '';
 
-    document.getElementById('modal-title').innerText = 'Добавить запись';
     document.getElementById('admin-modal').classList.remove('hidden');
     loadPrizesToSelect();
   }
@@ -98,17 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ВАЖНО: чтобы работали onclick="..." из HTML
-  window.openAddModal = openAddModal;
-  window.openEditModal = openEditModal;
   window.closeModal = closeModal;
+  window.saveHistory = saveHistory;
   window.setToday = setToday;
   window.setYesterday = setYesterday;
 
-  // ===== Data loaders =====
+  // ===================== Data =====================
   async function loadPrizesToSelect(selected) {
     const res = await fetch(`${SERVER_URL}/prizes`);
     const prizes = await res.json();
-
     const select = document.getElementById('input-prize');
     select.innerHTML = '<option value="">—</option>';
 
@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch(`${SERVER_URL}/names`);
       const data = await response.json();
+
       data.forEach(item => {
         const square = document.querySelector(`.number-square[data-number="${item.number}"]`);
         if (square) {
@@ -144,9 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '';
 
-      history.forEach((item) => {
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `
+      history.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
           <span>${item.date}: ${item.number}</span>
           ${isAuthenticated ? '<button class="edit-btn">✏</button>' : ''}
           <span class="winner-name">
@@ -154,10 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ${item.prize ? `<img src="pic/${item.prize}.png" class="winner-prize-icon">` : ''}
           </span>
         `;
-        historyList.appendChild(listItem);
+        historyList.appendChild(li);
 
         if (isAuthenticated) {
-          listItem.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
+          li.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
         }
       });
     } catch (error) {
@@ -169,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch(`${SERVER_URL}/prizes`);
       if (!response.ok) throw new Error('Ошибка загрузки призов');
-      const prizes = await response.json();
 
+      const prizes = await response.json();
       prizes.forEach(prize => {
         const el = document.getElementById(`count-${prize.prize}-value`);
         if (el) el.textContent = `${prize.count}`;
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ===== Save history =====
+  // ===================== Save history =====================
   async function saveHistory() {
     if (!isAuthenticated) {
       showAlert('Нет доступа', false);
@@ -193,9 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       name: document.getElementById('input-name').value.trim(),
       chosenNumber: document.getElementById('input-chosen').value,
       prize: document.getElementById('input-prize').value,
-      mode: editMode ? 'edit' : 'add',
-      // если у тебя на бэке нужно понимать, что редактируем конкретную запись:
-      // id: currentEdit?.id
+      mode: editMode ? 'edit' : 'add'
     };
 
     if (!payload.date || !payload.number) {
@@ -209,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
       if (!res.ok) throw new Error('Ошибка сервера');
 
       closeModal();
@@ -222,10 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ВАЖНО: чтобы работал onclick="saveHistory()" из HTML
-  window.saveHistory = saveHistory;
-
-  // ===== Prize edit buttons =====
+  // ===================== Prize edit =====================
   async function updatePrizeCount(prize, count) {
     try {
       const res = await fetch(`${SERVER_URL}/update-prize`, {
@@ -234,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ prize, count })
       });
       if (!res.ok) throw new Error();
+
       await updatePrizes();
       showAlert('Приз обновлён', true);
     } catch {
@@ -251,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const prizeKey = btn.dataset.prize;
         const currentValue = document.getElementById(`count-${prizeKey}-value`)?.innerText || '';
+
         const newValue = prompt(`Введите новое количество для "${prizeKey}":`, currentValue);
         if (newValue === null) return;
 
@@ -264,38 +261,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ===== Auth / numbers =====
+  // ===================== Auth / reserve =====================
   async function authenticate(password) {
     try {
       const response = await fetch(`${SERVER_URL}/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password })
       });
-
-      if (!response.ok) throw new Error('Ошибка авторизации');
+      if (!response.ok) return false;
 
       const data = await response.json();
+      if (!data.success) return false;
 
-      if (data.success) {
-        isAuthenticated = true;
-        localStorage.setItem('isAuthenticated', 'true');
+      isAuthenticated = true;
+      localStorage.setItem('isAuthenticated', 'true');
 
-        updateLogoutButton();
-        updateAdminUI();
-        updatePrizeEditButtons();
-        bindPrizeEditButtons();
-        await loadHistory();
+      updateLogoutButton();
+      updateAdminUI();
+      updatePrizeEditButtons();
+      bindPrizeEditButtons();
+      await loadHistory();
 
-        showAlert('Успешная авторизация!', true);
-        return true;
-      }
-
-      showAlert('Ошибка авторизации!', false);
-      return false;
-    } catch (error) {
-      console.error('Ошибка при авторизации:', error);
-      showAlert('Ошибка авторизации!', false);
+      return true;
+    } catch (e) {
+      console.error('Ошибка при авторизации:', e);
       return false;
     }
   }
@@ -305,12 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(`${SERVER_URL}/reserve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number, nickname }),
+        body: JSON.stringify({ number, nickname })
       });
       const data = await response.json();
       return data.success;
-    } catch (error) {
-      console.error('Ошибка при сохранении:', error);
+    } catch (e) {
+      console.error('Ошибка при сохранении:', e);
       return false;
     }
   }
@@ -323,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('logout-btn')?.addEventListener('click', logout);
 
-  // ===== Build grid + events =====
+  // ===================== Grid + click =====================
   if (isMobile()) {
     const video = document.querySelector('video');
     if (video) video.style.display = 'none';
@@ -350,30 +340,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!isAuthenticated) {
         const password = prompt('Введите пароль:');
-        if (password) await authenticate(password);
+        if (!password) return;
+
+        const ok = await authenticate(password);
+        if (ok) showAlert('Успешная авторизация!', true);
+        else showAlert('Ошибка авторизации!', false);
+
         return;
       }
 
       const number = square.getAttribute('data-number');
+
       if (square.classList.contains('reserved')) {
         const confirmFree = confirm('Освободить квадратик?');
-        if (confirmFree) {
-          const success = await reserveNumber(number, '');
-          if (success) {
-            square.classList.remove('reserved');
-            square.removeAttribute('title');
-            loadData();
-          }
+        if (!confirmFree) return;
+
+        const ok = await reserveNumber(number, '');
+        if (ok) {
+          square.classList.remove('reserved');
+          square.removeAttribute('title');
+          loadData();
         }
       } else {
         const nickname = prompt('Введите ник игрока:');
-        if (nickname) {
-          const success = await reserveNumber(number, nickname);
-          if (success) {
-            square.classList.add('reserved');
-            square.setAttribute('title', `Игрок: ${nickname}`);
-            loadData();
-          }
+        if (!nickname) return;
+
+        const ok = await reserveNumber(number, nickname);
+        if (ok) {
+          square.classList.add('reserved');
+          square.setAttribute('title', `Игрок: ${nickname}`);
+          loadData();
         }
       }
     });
@@ -382,7 +378,56 @@ document.addEventListener('DOMContentLoaded', () => {
   // Кнопка "Добавить"
   document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
 
-  // ===== Init =====
+  // ===================== Timer (без /generate) =====================
+  function calculateNextDate() {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun ... 6=Sat
+    const targetDays = [2, 6]; // Tue, Sat
+
+    let daysToAdd = 0;
+    for (let i = 0; i < targetDays.length; i++) {
+      const d = targetDays[i];
+      const isToday = d === dayOfWeek;
+      const beforeDrawTime = now.getHours() < 0 || (now.getHours() === 0 && now.getMinutes() < 1);
+      if (d > dayOfWeek || (isToday && beforeDrawTime)) {
+        daysToAdd = d - dayOfWeek;
+        break;
+      }
+    }
+    if (daysToAdd === 0) daysToAdd = targetDays[0] - dayOfWeek + 7;
+
+    const nextDate = new Date(now);
+    nextDate.setDate(now.getDate() + daysToAdd);
+    nextDate.setHours(0, 1, 0, 0);
+    return nextDate;
+  }
+
+  let nextDate = calculateNextDate();
+
+  function updateTimer() {
+    const now = new Date();
+    let diff = nextDate - now;
+
+    if (diff <= 0) {
+      nextDate = calculateNextDate();
+      loadHistory();
+      diff = nextDate - now;
+    }
+
+    diff = Math.max(0, diff);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const timerEl = document.getElementById('timer');
+    if (timerEl) timerEl.innerText = `${days} д. ${hours} ч. ${minutes} мин. ${seconds} сек.`;
+  }
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
+
+  // ===================== Init =====================
   updateLogoutButton();
   updateAdminUI();
   updatePrizeEditButtons();
