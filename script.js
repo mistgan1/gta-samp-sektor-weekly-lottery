@@ -504,23 +504,27 @@ async function deleteHistory(item) {
 
 // ------------------- Save to log -------------------
 
+const saveLogBtn = document.getElementById('save-to-log-btn');
+    if (saveLogBtn) {
+        saveLogBtn.addEventListener('click', () => {
+            if (!isAuthenticated) {
+                showAlert('Нет доступа', false);
+                return;
+            }
+            openSaveLogModal(); 
+        });
+    }
+
 function openSaveLogModal() {
-  if (!isAuthenticated) {
-    showAlert('Нет доступа', false);
-    return;
-  }
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const defaultFilename = `${day}_${month}_${year}`;
 
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, '0');
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const year = today.getFullYear();
-  const defaultFilename = `${day}_${month}_${year}`;
-
-  document.getElementById('log-filename').value = defaultFilename;
-  
-  document.getElementById('save-log-modal').classList.remove('hidden');
-}
-
+    document.getElementById('log-filename').value = defaultFilename;
+    document.getElementById('save-log-modal').classList.remove('hidden');
+}    
 function closeSaveLogModal() {
   document.getElementById('save-log-modal').classList.add('hidden');
 }
