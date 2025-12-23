@@ -1,3 +1,5 @@
+document.addEventListener('DOMContentLoaded', () => {
+
 console.log('SCRIPT LOADED');
 console.log('BEFORE FUNCTIONS');
 
@@ -499,7 +501,7 @@ updateTimer();
 
 console.log('BEFORE ONLOAD');
 
-window.onload = () => {
+
   console.log('ONLOAD FIRED');
   updateLogoutButton();
   updateAdminUI();
@@ -510,6 +512,6 @@ window.onload = () => {
 
   loadData();
   loadHistory();
-};
 
+});
 
