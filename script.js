@@ -57,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('modal-title').innerText = 'Добавить запись';
 
-    // очистка
     document.getElementById('input-date').value = '';
     document.getElementById('input-number').value = '';
     document.getElementById('input-name').value = '';
@@ -99,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('input-date').value = formatDate(d);
   }
 
-  // ВАЖНО: чтобы работали onclick="..." из HTML
+  // экспорт для inline onclick
   window.closeModal = closeModal;
   window.saveHistory = saveHistory;
   window.setToday = setToday;
@@ -138,6 +137,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===================== HISTORY + AUTOSCROLL =====================
+
+  function scrollHistoryToBottom() {
+    const history = document.getElementById('history');
+    if (!history) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        history.scrollTop = history.scrollHeight;
+      });
+    });
+  }
+
+  const historyListEl = document.getElementById('history-list');
+  if (historyListEl) {
+    const observer = new MutationObserver(() => {
+      scrollHistoryToBottom();
+    });
+    observer.observe(historyListEl, { childList: true, subtree: true });
+  }
+
   async function loadHistory() {
     try {
       const response = await fetch(`${SERVER_URL}/history`);
@@ -161,7 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
           li.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
         }
       });
-      scrollHistoryToBottom(); 
+
+      scrollHistoryToBottom();
     } catch (error) {
       console.error('Ошибка при загрузке истории:', error);
     }
@@ -181,12 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Ошибка загрузки призов:', error);
     }
   }
-
-  function scrollHistoryToBottom() {
-    const history = document.getElementById('history');
-    if (!history) return;
-    history.scrollTop = history.scrollHeight;
-    }
 
   // ===================== Save history =====================
   async function saveHistory() {
@@ -382,14 +397,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Кнопка "Добавить"
   document.getElementById('add-history-btn')?.addEventListener('click', openAddModal);
 
-  // ===================== Timer (без /generate) =====================
+  // ===================== Timer =====================
   function calculateNextDate() {
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun ... 6=Sat
-    const targetDays = [2, 6]; // Tue, Sat
+    const dayOfWeek = now.getDay();
+    const targetDays = [2, 6];
 
     let daysToAdd = 0;
     for (let i = 0; i < targetDays.length; i++) {
