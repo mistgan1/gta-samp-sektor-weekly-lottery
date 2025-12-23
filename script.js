@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
           li.querySelector('.edit-btn')?.addEventListener('click', () => openEditModal(item));
         }
       });
+      scrollHistoryToBottom(); 
     } catch (error) {
       console.error('Ошибка при загрузке истории:', error);
     }
@@ -180,6 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Ошибка загрузки призов:', error);
     }
   }
+
+  function scrollHistoryToBottom() {
+    const history = document.getElementById('history');
+    if (!history) return;
+    history.scrollTop = history.scrollHeight;
+    }
 
   // ===================== Save history =====================
   async function saveHistory() {
