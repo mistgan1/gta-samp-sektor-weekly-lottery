@@ -260,29 +260,25 @@ async function deleteHistory(item) {
     return;
   }
 
-  const ok = confirm(
-    `Удалить запись?\n\nДата: ${item.date}\nЧисло: ${item.number}`
-  );
-  if (!ok) return;
+  if (!confirm(`Удалить запись?\n\nДата: ${item.date}\nЧисло: ${item.number}`)) return;
 
   try {
-    const res = await fetch(`${SERVER_URL}/delete-history`, {
-      method: 'POST',
+    const res = await fetch(`${SERVER_URL}/history/${encodeURIComponent(item.date)}/${item.number}`, {
+      method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        date: item.date,
-        number: item.number
-      })
     });
 
-    if (!res.ok) throw new Error();
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Ошибка сервера');
+    }
 
     await loadHistory();
     await updatePrizes();
     showAlert('Запись удалена', true);
   } catch (e) {
     console.error(e);
-    showAlert('Ошибка удаления', false);
+    showAlert('Не удалось удалить запись: ' + (e.message || 'неизвестная ошибка'), false);
   }
 }
 
